@@ -44,7 +44,7 @@ print(f"✓ Created {df_features.shape[1]} features (including {len(lags)} lags,
 
 # 3. Train-Test Split
 print("\n[3/6] Splitting data...")
-CUTOFF_DATE = '2017-09-30'
+CUTOFF_DATE = '2025-06-30'   # train on 2021-2025H1, test on 2025H2
 train, test = time_series_split(df_features, CUTOFF_DATE)
 X_train = train.drop(columns=['sales'])
 y_train = train['sales']
