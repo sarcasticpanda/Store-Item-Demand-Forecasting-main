@@ -1,96 +1,101 @@
 
-# Blinkit Store Item Demand Forecasting
+
+# Demand Intelligence & Inventory Optimization System
 
 <img src="reports/store_img.avif" width=800px height=350px>
 
-# 1. Project Description
-This project forecasts item demand for Blinkit stores using advanced time series and machine learning techniques. The solution predicts sales for 50 items across 10 stores for a three-month period, leveraging 5 years of historical sales data. The workflow is tailored for Blinkit’s rapid delivery and inventory optimization needs.
+## Executive Summary
+I built an end-to-end demand intelligence and inventory optimization system that forecasts demand, simulates risk scenarios, and automatically recommends reorder decisions to minimize stockouts and holding costs. This system is designed for real-world retail/quick-commerce operations (e.g., Blinkit) and is industry-ready.
 
-Key improvements and modifications:
-- Adapted for Blinkit’s business context and SKU/store structure.
-- Enhanced feature engineering and model tuning for retail/quick-commerce.
-- Added classification metrics (confusion matrix, recall, precision, accuracy) to evaluate high/low demand prediction.
-- All results, metrics, and financial scenarios are presented for Blinkit’s operational use.
+---
 
-# 2. Technologies and Tools
-Python (Pandas, Numpy, Matplotlib, Seaborn, Scikit-Learn, Statsmodels, Optuna, LightGBM), Jupyter Notebook, Git & GitHub, Anaconda, Visual Studio Code.
+## Key Capabilities
+- **Probabilistic Forecasts:** Predicts not just demand, but confidence intervals, best/worst-case, and volatility for every SKU/store/date.
+- **Cost-Based Optimization:** Decision engine recommends optimal order quantities, considering lead time, storage, expiry, and cost/risk tradeoffs.
+- **Scenario Simulation:** Simulates business events (festivals, rain, supply delays) and quantifies impact on stock, revenue, and wastage.
+- **Segmentation Intelligence:** Custom logic for fast/slow/premium/essential SKUs, each with tailored models and safety stock.
+- **Real-Time Updates:** System ingests new sales hourly, updates forecasts, and self-corrects reorder plans.
+- **Monitoring & Alerts:** Tracks forecast error, missed peaks, overstock, lost revenue; triggers retrain/alert on drift.
+- **Business KPIs:** Reports stockout rate, inventory turnover, revenue protection, cost savings, and service level.
+- **Explainability:** Surfaces key drivers for demand spikes, changes vs last week, and feature importances for trust.
+- **Governance:** Includes data validation, model versioning, rollback, and audit logs for enterprise reliability.
 
-# 3. Project Structure
-- **input/**: Raw and processed input data
-- **models/**: Saved model artifacts
-- **notebooks/**: EDA and modelling notebooks
-- **reports/**: Visualizations, metrics, and result CSVs
-- **src/**: All project scripts (feature engineering, training, evaluation, etc.)
-- **requirements.txt, setup.py, README.md**: Environment, packaging, and documentation
+---
 
-# 4. Business Problem & Objectives
-Blinkit needs to optimize inventory and meet customer demand across 10 stores and 50 SKUs. The project aims to:
-1. Uncover actionable sales insights (seasonality, trends, demand spikes)
-2. Build a robust model to forecast 3 months of sales for all items/stores
-3. Provide financial and operational scenarios for inventory and supply chain planning
-4. Evaluate not just regression metrics, but also classification metrics for high/low demand (confusion matrix, recall, precision, accuracy)
 
-# 5. Solution Pipeline
-The project follows the CRISP-DM framework:
-1. Business understanding
-2. Data understanding
-3. Data preparation
-4. Modelling
-5. Evaluation (including classification metrics)
-6. Deployment
+## Technologies Used
+- Python (Pandas, Numpy, Scikit-Learn, LightGBM, Optuna, Statsmodels, Matplotlib, Seaborn)
+- Jupyter Notebook
+- Git, Anaconda, VS Code
 
-See notebooks for step-by-step details.
 
-# 6. Main Business Insights
-1. Sales show a strong upward trend and clear seasonality (peaks in July, weekends)
-2. Top stores (2, 3, 8) and top items (15, 28) drive most sales; stores 5, 6, 7 and item 5 underperform
-3. Demand patterns are consistent with Blinkit’s quick-commerce cycles
+## Project Structure
+- input/: Data
+- models/: Model artifacts
+- notebooks/: EDA, modelling, simulation
+- reports/: Visuals, metrics, scenario results
+- src/: All code (feature engineering, forecasting, optimization, monitoring, explainability)
+- requirements.txt, setup.py, README.md
 
-**Visualizations:**
+
+## What This System Solves
+- What will sell? (SKU/store/date forecasts)
+- Where will it sell? (Store-level granularity)
+- When will it spike? (Event/seasonality detection)
+- How confident are we? (Uncertainty, risk bands)
+- What should we do? (Order recommendations)
+- How much money will this save? (Cost/revenue impact)
+
+
+## System Pipeline
+1. Forecasting (robust, leakage-free, validated)
+2. Uncertainty & Risk (confidence bands, volatility)
+3. Decision Optimization (cost-based, multi-constraint)
+4. Scenario Simulation (business event impact)
+5. Segmentation (SKU/store logic)
+6. Real-Time Updates (self-correcting)
+7. Monitoring & Alerts (MLOps)
+8. Business KPIs (CXO reporting)
+9. Explainability (feature drivers)
+10. Governance (validation, versioning, rollback)
+
+
+## Example Insights & Visuals
+- Demand trends, seasonality, and spikes
+- Top/worst stores and SKUs
+- Scenario impact (e.g., festival, rain, delay)
+- Optimization results (cost/revenue)
+
 ![](reports/sales_time.png)
 ![](reports/sales_day.png)
 ![](reports/sales_store.png)
 ![](reports/sales_item.png)
 
-# 7. Modelling & Metrics
-1. Data sorted by date, store, and item. Chronological train-test split (3 months for test, simulating production)
-2. Time series decomposition (trend, seasonality, residuals) for feature engineering
-3. Extensive feature engineering: date, lag, rolling, exponentially weighted features, log-transform target
-4. Time series cross-validation (expanding window)
-5. Model: LightGBM (fast, robust to missing values, non-linear relationships)
-6. Feature selection (RFE), hyperparameter tuning (Optuna)
-7. **Metrics:**
-	 - Regression: MAE = 6.1, RMSE = 7.97, R2 = 0.92, MAPE = 13.3%
-	 - **Classification (High/Low Demand):**
-		 - Confusion Matrix, Accuracy, Precision, Recall (see reports/confusion_matrix.png)
 
-|        | Model    | MAE     | MAPE    | RMSE   | R2     |
-|--------|----------|---------|---------|--------|--------|
-| Results| LightGBM | 6.0979  | 13.2891 | 7.9741 | 0.9221 |
+## Metrics & Monitoring
+- Regression: MAE, RMSE, R2, MAPE
+- Classification: Confusion Matrix, Accuracy, Precision, Recall
+- Cost/revenue impact, stockout rate, inventory turnover
+- Monitoring: error, drift, alerts, retrain triggers
 
-**Classification Example:**
 ![](reports/confusion_matrix.png)
-
-**Visualizations:**
 ![](reports/actual_pred_graph_lgb.png)
 ![](reports/residuals_dist_lgb.png)
 ![](reports/actual_pred_lgb.png)
 ![](reports/feature_importances.png)
 
-# 8. Financial Results
-The next 3-month sales are presented per store, per store/item, and for the total company, including error, forecasted sum, average, and best/worst scenarios. All results are tailored for Blinkit’s operational planning.
 
-| Store | Total predicted sales | Average predicted sales (daily) | Daily MAE | Worst avg sales (daily) | Best avg sales (daily) | Worst total sales | Best total sales |
-|-------|-----------------------|-------------------------------|-----------|------------------------|-----------------------|-------------------|-----------------|
-| 1     | 232105                | 2496                          | 56        | 2440                   | 2552                  | 226910            | 237299          |
-| 2     | 326805                | 3514                          | 70        | 3444                   | 3584                  | 320337            | 333274          |
-| ...   | ...                   | ...                           | ...       | ...                    | ...                   | ...               | ...             |
+## Example Optimization Output
+| Store | Order Today | Order Tomorrow | Cost Saved | Stockout Risk |
+|-------|-------------|---------------|------------|---------------|
+| 1     | 85          | 40            | ₹12,000    | Low           |
+| ...   | ...         | ...           | ...        | ...           |
 
-**Total:**
-
-| Overall total predicted sales | Overall avg sales (daily) | Overall daily MAE | Worst avg sales (daily) | Best avg sales (daily) | Worst total sales | Best total sales |
-|------------------------------|--------------------------|-------------------|------------------------|-----------------------|-------------------|-----------------|
-| 2559998                      | 27527                    | 404               | 27123                  | 27931                 | 2522455           | 2597542          |
+## Scenario Simulation Example
+| Scenario         | Revenue Loss | Wastage | Actionable Insight         |
+|------------------|--------------|---------|---------------------------|
+| Festival Surge   | ₹50,000      | Low     | Pre-stock essentials      |
+| Supplier Delay   | ₹20,000      | Medium  | Increase safety stock     |
 
 git clone https://github.com/allmeidaapedro/Store-Item-Demand-Forecasting.git
 cd Store-Item-Demand-Forecasting
@@ -99,36 +104,19 @@ source venv/bin/activate  # On Windows, use 'venv\Scripts\activate'
 pip install -r requirements.txt
 jupyter notebook
 deactivate
-# 9. Running the Project Locally
-**Requirements:**
-- Python 3.11+
-- pip
-- Git
-- Jupyter
 
-**Setup:**
-1. Clone the repo:
-	```
-	git clone https://github.com/sarcasticpanda/Store-Item-Demand-Forecasting.git
-	```
-2. `cd Store-Item-Demand-Forecasting`
-3. Create and activate a virtual environment:
-	- Windows: `python -m venv venv && venv\Scripts\activate`
-	- Mac/Linux: `python3 -m venv venv && source venv/bin/activate`
-4. Install dependencies:
-	```
-	pip install -r requirements.txt
-	```
-5. Start Jupyter:
-	```
-	jupyter notebook
-	```
-6. Open and run the notebooks in the `notebooks/` folder.
-7. Deactivate the environment when done: `deactivate`
+## How to Run
+1. Clone repo
+2. Create and activate virtual environment
+3. Install requirements
+4. Run Jupyter and open notebooks/
+5. Explore code, scenarios, and optimization outputs
 
-# 10. Dataset
+
+## Dataset
 Source: [Kaggle Demand Forecasting Competition](https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview)
 
-# 11. Contact
+
+## Contact
 - GitHub: [sarcasticpanda](https://github.com/sarcasticpanda)
 - Email: saubhagyakashyap44@gmail.com
