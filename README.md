@@ -26,7 +26,7 @@ I built an end-to-end demand intelligence and inventory optimization system that
 ## Technologies Used
 - Python (Pandas, Numpy, Scikit-Learn, LightGBM, Optuna, Statsmodels, Matplotlib, Seaborn)
 - Jupyter Notebook
-- Git, Anaconda, VS Code
+- Git, Anaconda, VS Code.
 
 
 ## Project Structure
