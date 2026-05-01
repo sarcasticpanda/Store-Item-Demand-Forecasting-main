@@ -97,13 +97,7 @@ I built an end-to-end demand intelligence and inventory optimization system that
 | Festival Surge   | ₹50,000      | Low     | Pre-stock essentials      |
 | Supplier Delay   | ₹20,000      | Medium  | Increase safety stock     |
 
-git clone https://github.com/allmeidaapedro/Store-Item-Demand-Forecasting.git
-cd Store-Item-Demand-Forecasting
-python -m venv venv
-source venv/bin/activate  # On Windows, use 'venv\Scripts\activate'
-pip install -r requirements.txt
-jupyter notebook
-deactivate
+
 
 ## How to Run
 1. Clone repo
@@ -114,7 +108,7 @@ deactivate
 
 
 ## Dataset
-Source: [Kaggle Demand Forecasting Competition](https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview)
+Source: [Kaggle Demand Forecasting](https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview)
 
 
 ## Contact
