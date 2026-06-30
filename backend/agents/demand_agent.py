@@ -20,7 +20,7 @@ from .state import AgentState, AgentStep, DemandItem
 from core.database import get_db
 from core.config import settings
 from services.inventory_service import get_inventory_status
-from services.festival_service import get_upcoming_events
+from services.festival_service import get_upcoming_events, get_actionable_festival_boost
 from ml.predictor import forecast as run_forecast
 
 logger = logging.getLogger("inveniq.agents")
@@ -170,13 +170,10 @@ def demand_node(state: AgentState) -> dict:
         except Exception:
             avg_demand = s.get("recommended_order_qty", 30) / 7
 
-        festival_boost = 1.0
-        festival_name  = None
-        for fest in upcoming:
-            mult = fest["multipliers"].get(category.lower(), 1.0)
-            if mult > festival_boost:
-                festival_boost = mult
-                festival_name  = fest["name"]
+        # Category-aware: dairy (shelf life ~5d) won't boost 59 days before Janmashtami
+        festival_name, festival_boost = get_actionable_festival_boost(
+            category, lead_time=lead_time
+        )
 
         if s["status"] == "stockout" or s["days_until_stockout"] <= 1:
             urgency = "critical"

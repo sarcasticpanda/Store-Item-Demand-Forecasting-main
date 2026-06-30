@@ -1,10 +1,27 @@
 """
 Indian festival calendar with demand multipliers by product category.
 Applied as POST-PROCESSING on ML predictions — not as model features.
+
+Stocking logic is category-aware:
+  dairy     → 5-day shelf life → only pre-stock 2-4 days before festival
+  snacks    → 90-day shelf life → pre-stock up to 14 days before
+  staples   → 180-day shelf life → pre-stock up to 30 days before
+  beverages → 90-day shelf life → pre-stock up to 10 days before
+  hpc       → 365-day shelf life → pre-stock up to 21 days before
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
+
+# How many days before a festival each category should START stocking up.
+# Based on real shelf life. Dairy cannot be pre-stocked more than 3 days early.
+CATEGORY_STOCKING_HORIZON = {
+    "dairy":     3,    # Amul Milk expires in ~5 days — order 3 days before festival
+    "snacks":    14,   # Lays/Parle-G — months shelf life, pre-stock 2 weeks early
+    "staples":   30,   # Atta/Dal/Oil — 6-12 months shelf life, pre-stock 1 month early
+    "beverages": 10,   # Coke/Juice — pre-stock 10 days early
+    "hpc":       21,   # Soap/Shampoo — pre-stock 3 weeks early
+}
 
 FESTIVALS = [
     # ── 2026 ──────────────────────────────────────────────────────────────
@@ -44,7 +61,6 @@ def get_festival_for_date(date_str: str) -> Optional[Dict]:
         center = _parse(f["date"])
         half = f["window"] // 2
         if center - timedelta(days=half) <= d <= center + timedelta(days=half):
-            # Pick the festival with the strongest average multiplier
             avg_mult = sum(f["multipliers"].values()) / len(f["multipliers"])
             if best is None or avg_mult > best["_avg"]:
                 best = {**f, "_avg": avg_mult}
@@ -62,13 +78,48 @@ def get_festival_multiplier(date_str: str, category: str) -> float:
 
 
 def get_festival_name(date_str: str) -> Optional[str]:
-    """Return festival name for this date, or None."""
     f = get_festival_for_date(date_str)
     return f["name"] if f else None
 
 
+def get_actionable_festival_boost(category: str, days_away: int, lead_time: int = 1) -> tuple:
+    """
+    Returns (festival_name, multiplier) only when it is the RIGHT TIME to
+    actually place a stocking order for this category.
+
+    Dairy with Janmashtami 59 days away → returns (None, 1.0) — too early, will expire.
+    Snacks with Diwali 10 days away → returns ("Diwali", 1.6) — act now.
+    """
+    today = datetime.utcnow().date()
+    category_lower = category.lower()
+    stocking_horizon = CATEGORY_STOCKING_HORIZON.get(category_lower, 14)
+
+    best_name = None
+    best_mult = 1.0
+
+    for f in FESTIVALS:
+        center = _parse(f["date"]).date()
+        days_to_festival = (center - today).days
+
+        # Skip if the festival is already over
+        if days_to_festival < -f["window"] // 2:
+            continue
+
+        # Skip if it's too early to stock this category
+        # (order now would expire before the festival)
+        if days_to_festival > stocking_horizon + lead_time:
+            continue
+
+        mult = f["multipliers"].get(category_lower, 1.0)
+        if mult > best_mult:
+            best_mult = mult
+            best_name = f["name"]
+
+    return best_name, best_mult
+
+
 def get_upcoming_events(days: int = 60) -> List[Dict]:
-    """Return festivals starting within the next `days` days."""
+    """Return festivals starting within the next `days` days, with per-category stocking advice."""
     today = datetime.utcnow().date()
     results = []
     for f in FESTIVALS:
@@ -76,15 +127,24 @@ def get_upcoming_events(days: int = 60) -> List[Dict]:
         half = f.get("window", 1) // 2
         start = center - timedelta(days=half)
         end = center + timedelta(days=half)
-        # Show if the festival window overlaps with [today, today+days]
         if end >= today and start <= today + timedelta(days=days):
             days_away = (center - today).days
+            # Per-category stocking advice
+            stocking_advice = {}
+            for cat, mult in f["multipliers"].items():
+                horizon = CATEGORY_STOCKING_HORIZON.get(cat, 14)
+                if days_away <= horizon:
+                    stocking_advice[cat] = f"ORDER NOW (×{mult})"
+                else:
+                    stocking_advice[cat] = f"order in {days_away - horizon}d (×{mult})"
+
             results.append({
                 "name": f["name"],
                 "date": f["date"],
                 "days_away": days_away,
                 "window_days": f["window"],
                 "multipliers": f["multipliers"],
+                "stocking_advice": stocking_advice,
                 "peak_category": max(f["multipliers"], key=f["multipliers"].get),
                 "peak_multiplier": max(f["multipliers"].values()),
             })
