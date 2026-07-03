@@ -6,27 +6,18 @@ import {
   RefreshCw, ShoppingCart, ChevronDown, ChevronUp,
 } from "lucide-react";
 
-const AGENT_META: Record<string, { label: string; icon: typeof Brain; color: string; bg: string }> = {
-  demand:    { label: "Demand Agent",    icon: Brain,   color: "text-accent-cyan",   bg: "bg-accent-cyan/10"   },
-  inventory: { label: "Inventory Agent", icon: Package, color: "text-accent-violet", bg: "bg-accent-violet/10" },
-  logistics: { label: "Logistics Agent", icon: Truck,   color: "text-accent-green",  bg: "bg-accent-green/10"  },
+const AGENT_META: Record<string, { label: string; icon: typeof Brain; color: string }> = {
+  demand:    { label: "Demand Agent",    icon: Brain,   color: "text-brand"    },
+  inventory: { label: "Inventory Agent", icon: Package, color: "text-sig-blue" },
+  logistics: { label: "Logistics Agent", icon: Truck,   color: "text-sig-green"},
 };
 
 const LEVEL_COLOR: Record<string, string> = {
-  info: "text-slate-400", warning: "text-amber-400", error: "text-red-400", success: "text-emerald-400",
+  info: "text-ink-2", warning: "text-sig-amber", error: "text-sig-red", success: "text-sig-green",
 };
 
-const URGENCY_CHIP: Record<string, string> = {
-  critical: "bg-red-500/15 text-red-400 border-red-500/30",
-  high:     "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  normal:   "bg-slate-500/10 text-slate-400 border-slate-500/20",
-};
-
-const PRIORITY_CHIP: Record<string, string> = {
-  urgent: "bg-red-500/15 text-red-400 border-red-500/30",
-  high:   "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  normal: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-};
+const URGENCY_TAG: Record<string, string> = { critical: "tag-red", high: "tag-amber", normal: "tag-ink" };
+const PRIORITY_TAG: Record<string, string> = { urgent: "tag-red", high: "tag-amber", normal: "tag-green" };
 
 export default function AgentsPage() {
   const [stores, setStores]             = useState<Store[]>([]);
@@ -95,44 +86,40 @@ export default function AgentsPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Header */}
-      <div className="px-8 pt-8 pb-6 border-b border-bg-border"
-        style={{ background: "linear-gradient(180deg,rgba(139,92,246,.05) 0%,transparent 100%)" }}>
+      {/* Masthead */}
+      <header className="px-8 pt-8 pb-6 bg-surface" style={{ borderBottom: "1px solid var(--rule-strong)" }}>
         <div className="flex items-center gap-2 mb-2">
-          <span className="pill-violet">
-            <Zap className="w-3 h-3" />
-            AI Control Tower
-          </span>
+          <span className="pill-brand"><Zap className="w-3 h-3" /> AI Control Tower</span>
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Multi-Agent Inventory Planner</h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <h1 className="display-heading text-3xl">Multi-Agent Inventory Planner</h1>
+        <p className="text-ink-3 text-sm mt-1.5 font-mono">
           Three LangGraph agents debate demand signals and draft purchase orders for manager approval
         </p>
-      </div>
+      </header>
 
-      <div className="px-8 py-7 space-y-7 max-w-5xl">
+      <div className="px-8 py-7 space-y-6 max-w-5xl">
 
         {/* Agent pipeline */}
-        <div className="card border-violet-500/10">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 mb-4">Agent Pipeline</p>
+        <div className="card">
+          <p className="section-title mb-4">Agent Pipeline</p>
           <div className="flex items-center gap-3 flex-wrap">
             {(["demand", "inventory", "logistics"] as const).map((key, i) => {
               const m = AGENT_META[key];
               const Icon = m.icon;
               return (
                 <div key={key} className="flex items-center gap-3">
-                  <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border ${m.bg} border-current/20`}>
+                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded border border-rule bg-panel">
                     <Icon className={`w-4 h-4 ${m.color}`} />
                     <div>
                       <div className={`text-xs font-semibold ${m.color}`}>{m.label}</div>
-                      <div className="text-[10px] text-slate-600 mt-0.5">
+                      <div className="text-[10px] text-ink-3 mt-0.5">
                         {key === "demand" ? "Forecast · Anomaly detection" :
                          key === "inventory" ? "Capacity · Festival adjust" :
                          "Draft PO · Cost analysis"}
                       </div>
                     </div>
                   </div>
-                  {i < 2 && <div className="text-slate-700 font-mono text-lg">→</div>}
+                  {i < 2 && <div className="text-ink-4 font-mono text-lg">→</div>}
                 </div>
               );
             })}
@@ -140,29 +127,25 @@ export default function AgentsPage() {
         </div>
 
         {/* Trigger */}
-        <div className="card space-y-4">
-          <div className="flex items-center gap-4 flex-wrap">
+        <div className="card">
+          <div className="flex items-end gap-4 flex-wrap">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Store</label>
+              <label className="eyebrow">Store</label>
               <select value={storeId} onChange={(e) => setStoreId(+e.target.value)} className="select w-72">
                 {stores.map((s) => <option key={s._id} value={s._id}>{s.name} · {s.city}</option>)}
               </select>
             </div>
-            <div className="flex flex-col justify-end">
-              <button onClick={handleRun} disabled={running}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50 mt-5">
-                {running
-                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Running agents…</>
-                  : <><Zap className="w-4 h-4" /> Run AI Analysis</>}
-              </button>
-            </div>
+            <button onClick={handleRun} disabled={running} className="btn-brand disabled:opacity-50">
+              {running
+                ? <><RefreshCw className="w-4 h-4 animate-spin" /> Running agents…</>
+                : <><Zap className="w-4 h-4" /> Run AI Analysis</>}
+            </button>
           </div>
           {running && (
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-ink-3 mt-4">
               <div className="flex gap-1">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }} />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full bg-brand animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                 ))}
               </div>
               Agents are analysing inventory and running forecasts…
@@ -172,13 +155,12 @@ export default function AgentsPage() {
 
         {/* Activity Feed */}
         {currentRun && (
-          <div className="card border-violet-500/10 space-y-4">
+          <div className="card space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-                <span className="text-sm font-semibold text-white">Agent Activity Feed</span>
-              </div>
-              <span className="font-mono text-[10px] text-slate-600">{currentRun.store_name}</span>
+              <span className="section-title">
+                <span className="w-2 h-2 rounded-full bg-brand animate-pulse-slow" /> Agent Activity Feed
+              </span>
+              <span className="font-mono text-[10px] text-ink-3">{currentRun.store_name}</span>
             </div>
 
             <div ref={feedRef} className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
@@ -186,22 +168,20 @@ export default function AgentsPage() {
                 const meta = AGENT_META[step.agent];
                 const Icon = meta?.icon ?? Brain;
                 return (
-                  <div key={i}
-                    className="flex gap-3 rounded-xl px-3 py-2.5"
-                    style={{ background: "rgba(255,255,255,0.02)", animation: "fadeSlideIn 0.25s ease-out" }}>
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${meta?.bg ?? "bg-slate-500/10"}`}>
-                      <Icon className={`w-3 h-3 ${meta?.color ?? "text-slate-400"}`} />
+                  <div key={i} className="flex gap-3 rounded px-3 py-2.5 bg-panel" style={{ animation: "fadeSlideIn 0.25s ease-out" }}>
+                    <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 mt-0.5 bg-surface border border-rule">
+                      <Icon className={`w-3 h-3 ${meta?.color ?? "text-ink-3"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${meta?.color ?? "text-slate-400"}`}>
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider font-mono ${meta?.color ?? "text-ink-3"}`}>
                           {meta?.label ?? step.agent}
                         </span>
-                        <span className={`text-xs font-medium ${LEVEL_COLOR[step.level] ?? "text-slate-400"}`}>
+                        <span className={`text-xs font-medium ${LEVEL_COLOR[step.level] ?? "text-ink-2"}`}>
                           {step.message}
                         </span>
                       </div>
-                      {step.detail && <p className="text-[11px] text-slate-600 mt-0.5">{step.detail}</p>}
+                      {step.detail && <p className="text-[11px] text-ink-3 mt-0.5">{step.detail}</p>}
                     </div>
                   </div>
                 );
@@ -210,28 +190,27 @@ export default function AgentsPage() {
                 <div className="flex items-center gap-2 px-3 py-2">
                   <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
-                      <div key={i} className="w-1 h-1 rounded-full bg-violet-400 animate-bounce"
-                        style={{ animationDelay: `${i * 0.12}s` }} />
+                      <div key={i} className="w-1 h-1 rounded-full bg-brand animate-bounce" style={{ animationDelay: `${i * 0.12}s` }} />
                     ))}
                   </div>
-                  <span className="text-[11px] text-slate-600">Processing…</span>
+                  <span className="text-[11px] text-ink-3">Processing…</span>
                 </div>
               )}
             </div>
 
             {visibleSteps >= currentRun.steps.length && currentRun.demand_analysis.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-bg-border">
+              <div className="grid grid-cols-3 gap-3 pt-3" style={{ borderTop: "1px solid var(--rule)" }}>
                 <div className="stat-chip text-center">
-                  <span className="text-slate-500 text-[10px] uppercase tracking-wider">SKUs flagged</span>
-                  <span className="text-xl font-bold text-white font-mono mt-1 block">{currentRun.demand_analysis.length}</span>
+                  <span className="eyebrow">SKUs flagged</span>
+                  <span className="figure text-xl mt-1 block">{currentRun.demand_analysis.length}</span>
                 </div>
                 <div className="stat-chip text-center">
-                  <span className="text-slate-500 text-[10px] uppercase tracking-wider">Order lines</span>
-                  <span className="text-xl font-bold text-accent-cyan font-mono mt-1 block">{currentRun.validated_orders.length}</span>
+                  <span className="eyebrow">Order lines</span>
+                  <span className="figure text-xl text-brand mt-1 block">{currentRun.validated_orders.length}</span>
                 </div>
                 <div className="stat-chip text-center">
-                  <span className="text-slate-500 text-[10px] uppercase tracking-wider">Total cost</span>
-                  <span className="text-xl font-bold text-accent-green font-mono mt-1 block">
+                  <span className="eyebrow">Total cost</span>
+                  <span className="figure text-xl text-sig-green mt-1 block">
                     ₹{currentRun.validated_orders.reduce((s, o) => s + o.subtotal, 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
                   </span>
                 </div>
@@ -300,11 +279,11 @@ function POCard({
 }) {
   if (poStatus === "approved") {
     return (
-      <div className="card border-emerald-500/20 flex items-center gap-3">
-        <CheckCircle className="w-5 h-5 text-emerald-400" />
+      <div className="card rail-green flex items-center gap-3">
+        <CheckCircle className="w-5 h-5 text-sig-green" />
         <div>
-          <p className="text-sm font-semibold text-emerald-300">Purchase Order Approved</p>
-          <p className="text-xs text-slate-500">PO#{poId.slice(0, 8).toUpperCase()} · Order submitted for processing</p>
+          <p className="text-sm font-semibold text-sig-green">Purchase Order Approved</p>
+          <p className="text-xs text-ink-3 font-mono">PO#{poId.slice(0, 8).toUpperCase()} · Order submitted for processing</p>
         </div>
       </div>
     );
@@ -312,11 +291,11 @@ function POCard({
 
   if (poStatus === "rejected") {
     return (
-      <div className="card border-red-500/20 flex items-center gap-3">
-        <XCircle className="w-5 h-5 text-red-400" />
+      <div className="card rail-red flex items-center gap-3">
+        <XCircle className="w-5 h-5 text-sig-red" />
         <div>
-          <p className="text-sm font-semibold text-red-300">Purchase Order Rejected</p>
-          <p className="text-xs text-slate-500">PO#{poId.slice(0, 8).toUpperCase()} · {rejectNote[poId] || "No reason given"}</p>
+          <p className="text-sm font-semibold text-sig-red">Purchase Order Rejected</p>
+          <p className="text-xs text-ink-3 font-mono">PO#{poId.slice(0, 8).toUpperCase()} · {rejectNote[poId] || "No reason given"}</p>
         </div>
       </div>
     );
@@ -324,11 +303,11 @@ function POCard({
 
   if (!po) {
     return (
-      <div className="card border-violet-500/10 flex items-center gap-3 py-5">
-        <ShoppingCart className="w-5 h-5 text-violet-400" />
+      <div className="card rail-brand flex items-center gap-3 py-5">
+        <ShoppingCart className="w-5 h-5 text-brand" />
         <div>
-          <p className="text-sm font-semibold text-white">Purchase Order Generated</p>
-          <p className="text-[11px] text-slate-500 font-mono mt-0.5">PO#{poId.slice(0, 8).toUpperCase()} · Loading details…</p>
+          <p className="text-sm font-semibold text-ink">Purchase Order Generated</p>
+          <p className="text-[11px] text-ink-3 font-mono mt-0.5">PO#{poId.slice(0, 8).toUpperCase()} · Loading details…</p>
         </div>
       </div>
     );
@@ -337,36 +316,27 @@ function POCard({
   const totalCost = po.total_cost ?? po.items.reduce((s, i) => s + i.subtotal, 0);
 
   return (
-    <div className="card border-violet-500/15 space-y-0">
-      {/* ── PO Header ── */}
+    <div className="card rail-brand space-y-0">
+      {/* PO Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <ShoppingCart className="w-4 h-4 text-violet-400" />
-            <span className="text-sm font-bold text-white font-mono">PO#{po._id.slice(0, 8).toUpperCase()}</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${PRIORITY_CHIP[po.priority] ?? ""}`}>
-              {po.priority}
-            </span>
+            <ShoppingCart className="w-4 h-4 text-brand" />
+            <span className="text-sm font-bold text-ink font-mono">PO#{po._id.slice(0, 8).toUpperCase()}</span>
+            <span className={`tag ${PRIORITY_TAG[po.priority] ?? "tag-ink"}`}>{po.priority}</span>
           </div>
-          <p className="text-xs text-slate-500">{po.store_name} · ETA {po.estimated_delivery}</p>
+          <p className="text-xs text-ink-3">{po.store_name} · ETA {po.estimated_delivery}</p>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-white font-mono">
-            ₹{totalCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-[11px] text-slate-500">{po.items.length} line items</div>
+          <div className="figure text-xl">₹{totalCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</div>
+          <div className="text-[11px] text-ink-3">{po.items.length} line items</div>
         </div>
       </div>
 
-      {/* ── Approve / Reject — always visible at the TOP ── */}
-      <div className="flex items-start gap-3 py-4 border-t border-bg-border flex-wrap">
-        <button
-          onClick={() => onApprove(po._id)}
-          disabled={!!poAction[po._id]}
-          className="btn-primary flex items-center gap-1.5 disabled:opacity-50">
-          {poAction[po._id] === "approving"
-            ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            : <CheckCircle className="w-3.5 h-3.5" />}
+      {/* Approve / Reject — always visible at the TOP */}
+      <div className="flex items-start gap-3 py-4 flex-wrap" style={{ borderTop: "1px solid var(--rule)" }}>
+        <button onClick={() => onApprove(po._id)} disabled={!!poAction[po._id]} className="btn-approve disabled:opacity-50">
+          {poAction[po._id] === "approving" ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
           Approve Order
         </button>
 
@@ -377,85 +347,57 @@ function POCard({
                 value={rejectNote[po._id] ?? ""}
                 onChange={(e) => setRejectNote((n) => ({ ...n, [po._id]: e.target.value }))}
                 placeholder="Reason for rejection (optional)"
-                className="flex-1 bg-bg-panel border border-bg-border rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 outline-none focus:border-red-500/50"
+                className="input flex-1"
               />
-              <button
-                onClick={() => onReject(po._id)}
-                disabled={!!poAction[po._id]}
-                className="shrink-0 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center gap-1.5">
-                {poAction[po._id] === "rejecting"
-                  ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  : <XCircle className="w-3.5 h-3.5" />}
+              <button onClick={() => onReject(po._id)} disabled={!!poAction[po._id]} className="btn-danger shrink-0 disabled:opacity-50">
+                {poAction[po._id] === "rejecting" ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                 Confirm Reject
               </button>
-              <button
-                onClick={() => setRejectOpen((o) => ({ ...o, [po._id]: false }))}
-                className="shrink-0 px-3 py-2 rounded-lg text-slate-500 text-sm hover:text-slate-300 transition-colors">
-                Cancel
-              </button>
+              <button onClick={() => setRejectOpen((o) => ({ ...o, [po._id]: false }))} className="btn-ghost shrink-0">Cancel</button>
             </div>
           ) : (
-            <button
-              onClick={() => setRejectOpen((o) => ({ ...o, [po._id]: true }))}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-red-400 text-sm font-medium border border-red-500/20 hover:bg-red-500/8 transition-colors">
-              <XCircle className="w-3.5 h-3.5" />
-              Reject
+            <button onClick={() => setRejectOpen((o) => ({ ...o, [po._id]: true }))}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded text-sig-red text-sm font-medium border border-rule-strong hover:bg-panel transition-colors">
+              <XCircle className="w-3.5 h-3.5" /> Reject
             </button>
           )}
         </div>
 
-        {/* Expand/Collapse toggle */}
-        <button
-          onClick={onToggle}
-          className="btn-ghost flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 shrink-0">
+        <button onClick={onToggle} className="btn-ghost text-xs shrink-0">
           {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           {expanded ? "Hide" : "View"} line items
         </button>
       </div>
 
-      {/* ── Line items — collapsed by default ── */}
+      {/* Line items — collapsed by default */}
       {expanded && (
-        <div className="overflow-x-auto border-t border-bg-border pt-4">
+        <div className="overflow-x-auto pt-4" style={{ borderTop: "1px solid var(--rule)" }}>
           <table className="data-table text-xs w-full">
             <thead>
               <tr>
-                <th className="text-left">Product</th>
-                <th>Urgency</th>
-                <th>Stock</th>
-                <th>Order Qty</th>
-                <th>Unit Cost</th>
-                <th>Subtotal</th>
+                <th className="text-left">Product</th><th>Urgency</th><th>Stock</th>
+                <th>Order Qty</th><th>Unit Cost</th><th>Subtotal</th>
               </tr>
             </thead>
             <tbody>
               {po.items.map((item, i) => (
                 <tr key={i}>
                   <td className="text-left">
-                    <div className="font-medium">{item.item_name}</div>
-                    {item.festival_adjusted && (
-                      <div className="text-[10px] text-amber-400 mt-0.5">Festival-adjusted</div>
-                    )}
+                    <div className="font-medium text-ink">{item.item_name}</div>
+                    {item.festival_adjusted && <div className="text-[10px] text-sig-amber mt-0.5">Festival-adjusted</div>}
                   </td>
-                  <td>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded border font-semibold uppercase ${URGENCY_CHIP[item.urgency]}`}>
-                      {item.urgency}
-                    </span>
-                  </td>
-                  <td className="font-mono text-slate-400">{item.current_stock}</td>
-                  <td className="font-mono font-bold text-white">{item.order_qty}</td>
-                  <td className="font-mono text-slate-400">₹{item.unit_cost.toFixed(0)}</td>
-                  <td className="font-mono text-accent-green">
-                    ₹{item.subtotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                  </td>
+                  <td><span className={`tag ${URGENCY_TAG[item.urgency] ?? "tag-ink"}`}>{item.urgency}</span></td>
+                  <td className="font-mono text-ink-3 tnum">{item.current_stock}</td>
+                  <td className="font-mono font-bold text-ink tnum">{item.order_qty}</td>
+                  <td className="font-mono text-ink-3 tnum">₹{item.unit_cost.toFixed(0)}</td>
+                  <td className="font-mono text-sig-green tnum">₹{item.subtotal.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={5} className="text-right font-semibold text-slate-400 text-xs pt-2">Total</td>
-                <td className="font-mono font-bold text-white pt-2">
-                  ₹{totalCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                </td>
+                <td colSpan={5} className="text-right font-semibold text-ink-2 text-xs pt-2">Total</td>
+                <td className="font-mono font-bold text-ink pt-2 tnum">₹{totalCost.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</td>
               </tr>
             </tfoot>
           </table>

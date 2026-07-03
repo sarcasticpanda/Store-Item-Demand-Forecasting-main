@@ -8,73 +8,57 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ── Deep navy surfaces (not black) ───────────────────────
-        bg: {
-          base:   "#03070E",   // deepest navy
-          panel:  "#06101C",   // panel navy
-          card:   "#091522",   // card navy
-          hover:  "#0C1A2A",
-          border: "#0F2236",   // navy border
-          muted:  "#152B44",   // muted navy
+        // ── Warm paper surfaces (Light Ops Terminal) ─────────────
+        ground:  "#F4F0E7",   // page background — warm paper
+        surface: "#FFFDF9",   // cards / panels — bright paper
+        panel:   "#EFE9DB",   // recessed areas / table headers
+        sunk:    "#E7E0CF",   // deepest inset
+        // ── Ink type scale (warm near-black) ─────────────────────
+        ink: {
+          DEFAULT: "#1B1712",  // primary text
+          2:       "#4C463B",  // secondary text
+          3:       "#8A8071",  // muted labels
+          4:       "#B4AA97",  // faint / disabled
         },
-        // ── Primary accent: amber/saffron (replaces blue) ─────────
-        accent: {
-          blue:   "#60A5FA",   // muted sky (demoted — info only)
-          cyan:   "#10B981",   // emerald green (replaces cyan)
-          violet: "#A78BFA",   // soft violet
-          green:  "#22C55E",   // vivid green
-          amber:  "#F59E0B",   // AMBER — primary action color
-          red:    "#F87171",   // warm red
+        // ── Rules / hairlines ────────────────────────────────────
+        rule: {
+          DEFAULT: "#E1D9C7",  // hairline
+          strong:  "#CDC3AC",  // emphasized divider
         },
-        // ── Sidebar forest green ──────────────────────────────────
-        forest: {
-          900: "#030C06",
-          800: "#051009",
-          700: "#08180D",
-          600: "#0D2415",
-          500: "#16A34A",
+        // ── Brand: deep ink-blue (interactive / active) ──────────
+        brand: {
+          DEFAULT: "#1C3D5A",
+          ink:     "#12293D",
+          soft:    "#E5EAF0",
+        },
+        // ── Signal colors — stock state only (stamp-ink tones) ───
+        sig: {
+          red:   "#B23B2E",   // critical / stockout
+          amber: "#9A6B15",   // reorder
+          green: "#2E6E43",   // ok / healthy
+          blue:  "#2C5F86",   // overstock / info
         },
       },
       fontFamily: {
-        display: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
-        sans:    ["Inter", "system-ui", "sans-serif"],
-        mono:    ["JetBrains Mono", "monospace"],
+        display: ["Archivo", "system-ui", "sans-serif"],
+        sans:    ["Archivo", "system-ui", "sans-serif"],
+        mono:    ["'IBM Plex Mono'", "ui-monospace", "monospace"],
       },
-      backgroundImage: {
-        // amber-tinted grid instead of blue
-        "grid-pattern": "linear-gradient(rgba(245,158,11,0.018) 1px,transparent 1px),linear-gradient(to right,rgba(245,158,11,0.018) 1px,transparent 1px)",
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-      },
-      backgroundSize: {
-        "grid": "40px 40px",
+      borderRadius: {
+        // squared-off, manifest feel — small radii only
+        DEFAULT: "4px",
+        md: "5px",
+        lg: "6px",
+        xl: "8px",
       },
       boxShadow: {
-        "glow-amber":  "0 0 24px rgba(245,158,11,0.25), 0 0 60px rgba(245,158,11,0.06)",
-        "glow-green":  "0 0 24px rgba(34,197,94,0.2),  0 0 60px rgba(34,197,94,0.05)",
-        "glow-violet": "0 0 24px rgba(167,139,250,0.2), 0 0 60px rgba(167,139,250,0.05)",
-        "card":        "0 1px 4px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.025)",
-        "card-hover":  "0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
-        "card-amber":  "0 0 0 1px rgba(245,158,11,0.15), 0 4px 20px rgba(245,158,11,0.06)",
+        // soft ink shadows, no glow
+        card:       "0 1px 2px rgba(27,23,18,0.05), 0 1px 1px rgba(27,23,18,0.03)",
+        "card-lift":"0 4px 14px rgba(27,23,18,0.08), 0 1px 3px rgba(27,23,18,0.04)",
+        inset:      "inset 0 1px 0 rgba(255,255,255,0.6)",
       },
       animation: {
-        "spotlight": "spotlight 2s ease .75s 1 forwards",
         "pulse-slow": "pulse 3s cubic-bezier(0.4,0,0.6,1) infinite",
-        "float": "float 6s ease-in-out infinite",
-        "scan": "scan 8s linear infinite",
-      },
-      keyframes: {
-        spotlight: {
-          "0%":   { opacity: "0", transform: "translate(-72%, -62%) scale(0.5)" },
-          "100%": { opacity: "1", transform: "translate(-50%,-40%) scale(1)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%":      { transform: "translateY(-12px)" },
-        },
-        scan: {
-          "0%":   { transform: "translateY(-100%)" },
-          "100%": { transform: "translateY(100vh)" },
-        },
       },
     },
   },

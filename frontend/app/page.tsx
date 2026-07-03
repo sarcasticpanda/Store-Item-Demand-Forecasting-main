@@ -2,48 +2,39 @@
 import { useState, useEffect } from "react";
 import { api, type DashboardStats, type Alert, type Store, type Item, type FestivalEvent } from "@/lib/api";
 import { AlertTriangle, TrendingUp, Package, Store as StoreIcon, Activity, ArrowRight, Calendar, Flame, Info } from "lucide-react";
-import { StaticSpotlight } from "@/components/ui/spotlight";
 
 const SEGMENT_BADGE: Record<string, string> = {
   fast: "badge-fast", slow: "badge-slow", premium: "badge-premium", essential: "badge-essential",
 };
-const ALERT_BORDER: Record<string, string> = { critical: "border-l-red-500/70", reorder: "border-l-amber-500/70" };
-const ALERT_BG:     Record<string, string> = { critical: "bg-red-500/5",        reorder: "bg-amber-500/5" };
-const TIER_DOT:     Record<string, string> = {
-  high:   "bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.6)]",
-  medium: "bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.6)]",
-  low:    "bg-red-400 shadow-[0_0_6px_rgba(239,68,68,0.6)]",
-};
-const MULT_COLOR = (m: number) => m >= 1.5 ? "text-red-400" : m >= 1.3 ? "text-amber-400" : "text-emerald-400";
+const ALERT_RAIL: Record<string, string> = { critical: "rail-red", reorder: "rail-amber" };
+const TIER_DOT: Record<string, string> = { high: "bg-sig-green", medium: "bg-sig-amber", low: "bg-sig-red" };
+const MULT_COLOR = (m: number) => m >= 1.5 ? "tag-red" : m >= 1.3 ? "tag-amber" : "tag-green";
 
-function KpiCard({ label, value, sub, icon: Icon, accent, border }: {
+function KpiCard({ label, value, sub, icon: Icon, rail }: {
   label: string; value: string | number; sub?: string;
-  icon: React.ElementType; accent: string; border: string;
+  icon: React.ElementType; rail: string;
 }) {
   return (
-    <div className="card-glass group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
-      style={{ borderColor: border }}>
-      <div className="relative z-10 flex items-start gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="section-title">{label}</p>
-          <p className="text-2xl font-bold text-white mt-1 font-mono">{value}</p>
-          {sub && <p className="text-slate-500 text-xs mt-0.5">{sub}</p>}
-        </div>
+    <div className={`card-flat ${rail} flex items-start gap-3.5`}>
+      <div className="w-9 h-9 rounded flex items-center justify-center shrink-0 bg-panel border border-rule">
+        <Icon className="w-4 h-4 text-ink-2" strokeWidth={2} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="eyebrow">{label}</p>
+        <p className="figure text-2xl mt-1">{value}</p>
+        {sub && <p className="text-ink-3 text-xs mt-0.5">{sub}</p>}
       </div>
     </div>
   );
 }
 
 export default function DashboardPage() {
-  const [stats, setStats]       = useState<DashboardStats | null>(null);
-  const [alerts, setAlerts]     = useState<Alert[]>([]);
-  const [stores, setStores]     = useState<Store[]>([]);
-  const [items, setItems]       = useState<Item[]>([]);
-  const [events, setEvents]     = useState<FestivalEvent[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [stats, setStats]   = useState<DashboardStats | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [items, setItems]   = useState<Item[]>([]);
+  const [events, setEvents] = useState<FestivalEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -58,200 +49,168 @@ export default function DashboardPage() {
   }, []);
 
   const storeMap = Object.fromEntries(stores.map((s) => [s._id, s]));
-  const criticalAlerts  = alerts.filter((a) => a.alert_type === "critical");
-  const reorderAlerts   = alerts.filter((a) => a.alert_type === "reorder");
+  const criticalAlerts = alerts.filter((a) => a.alert_type === "critical");
+  const reorderAlerts  = alerts.filter((a) => a.alert_type === "reorder");
 
-  // Stockout urgency: alerts sorted by days_until_stockout ascending
   const urgentAlerts = [...alerts]
     .filter((a) => a.days_until_stockout <= 5)
     .sort((a, b) => a.days_until_stockout - b.days_until_stockout)
     .slice(0, 8);
 
-  // Top movers by avg_daily_sales
   const topItems = [...items].sort((a, b) => b.avg_daily_sales - a.avg_daily_sales).slice(0, 8);
 
-  const urgencyColor = (d: number) =>
-    d <= 1 ? "border-red-500/40 bg-red-500/8 text-red-300" :
-    d <= 3 ? "border-amber-500/40 bg-amber-500/8 text-amber-300" :
-             "border-slate-600/40 bg-slate-800/30 text-slate-400";
+  const urgencyTag = (d: number) => d <= 1 ? "tag-red" : d <= 3 ? "tag-amber" : "tag-ink";
 
   return (
     <div className="relative min-h-screen">
-      {/* Hero banner */}
-      <div className="relative overflow-hidden border-b border-bg-border hero-gradient">
-        <StaticSpotlight className="-top-40 left-0 md:left-60 md:-top-20" />
-        <div className="relative z-10 px-8 pt-10 pb-8">
-          <div className="flex items-start justify-between flex-wrap gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="pill-amber">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  Live Intelligence
-                </span>
-              </div>
-              <h1 className="display-heading text-3xl text-white">
-                Demand Intelligence
-                <span className="block text-base font-normal text-slate-500 mt-1.5" style={{ fontFamily: "Inter, sans-serif", letterSpacing: "normal" }}>
-                  Blinkit dark store inventory · 10 locations · 50 SKUs
-                </span>
-              </h1>
+      {/* ── Masthead ─────────────────────────────────────────── */}
+      <header className="px-8 pt-8 pb-6 bg-surface" style={{ borderBottom: "1px solid var(--rule-strong)" }}>
+        <div className="flex items-start justify-between flex-wrap gap-5">
+          <div>
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="pill-green">
+                <span className="w-1.5 h-1.5 rounded-full bg-sig-green animate-pulse-slow" />
+                Live
+              </span>
+              <span className="eyebrow">Demand Operations Terminal</span>
             </div>
-            {!loading && stats && (
-              <div className="hidden xl:flex gap-4 text-center">
-                {[
-                  { label: "Critical",  value: criticalAlerts.length,  color: "text-red-400" },
-                  { label: "Reorder",   value: reorderAlerts.length,   color: "text-amber-400" },
-                  { label: "Model R²",  value: `${(stats.model_r2 * 100).toFixed(1)}%`, color: "text-blue-400" },
-                ].map((m) => (
-                  <div key={m.label} className="stat-chip">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">{m.label}</span>
-                    <span className={`text-lg font-bold font-mono ${m.color}`}>{m.value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <h1 className="display-heading text-4xl leading-none">Demand Intelligence</h1>
+            <p className="text-sm text-ink-3 mt-2 font-mono">
+              Blinkit dark-store inventory · 10 locations · 50 SKUs
+            </p>
           </div>
+          {!loading && stats && (
+            <div className="flex gap-3">
+              {[
+                { label: "Critical",  value: criticalAlerts.length, tag: "text-sig-red" },
+                { label: "Reorder",   value: reorderAlerts.length,  tag: "text-sig-amber" },
+                { label: "Model R²",  value: `${(stats.model_r2 * 100).toFixed(1)}%`, tag: "text-brand" },
+              ].map((m) => (
+                <div key={m.label} className="stat-chip min-w-[92px]">
+                  <span className="eyebrow">{m.label}</span>
+                  <span className={`figure text-lg ${m.tag}`}>{m.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      </header>
 
       <div className="px-8 py-7 space-y-6">
-        {/* Stockout urgency bar */}
+        {/* ── Stockout risk ──────────────────────────────────── */}
         {(loading || urgentAlerts.length > 0) && (
-          <div className="card border-red-500/10">
+          <section className="card rail-red">
             <div className="flex items-center gap-2 mb-3">
-              <Flame className="w-4 h-4 text-red-400" />
-              <h2 className="font-semibold text-white text-sm">Stockout Risk</h2>
-              <span className="text-xs text-slate-600">Products running out within 5 days</span>
+              <Flame className="w-4 h-4 text-sig-red" />
+              <h2 className="section-title !text-ink">Stockout Risk</h2>
+              <span className="text-xs text-ink-3">— running out within 5 days</span>
             </div>
             {loading ? (
-              <div className="flex gap-2">{[...Array(4)].map((_, i) => (
-                <div key={i} className="h-8 w-36 rounded-full bg-bg-muted animate-pulse" />
-              ))}</div>
+              <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="h-7 w-36 skeleton" />)}</div>
             ) : urgentAlerts.length === 0 ? (
-              <p className="text-sm text-emerald-400">No urgent stockouts detected.</p>
+              <p className="text-sm text-sig-green">No urgent stockouts detected.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {urgentAlerts.map((a) => {
-                  const storeName = storeMap[a.store_id]?.name ?? `Store ${a.store_id}`;
+                  const storeName = (storeMap[a.store_id]?.name ?? `Store ${a.store_id}`).replace("Blinkit ", "");
                   return (
-                    <a key={a._id} href="/inventory"
-                      className={`inline-flex items-center gap-2 border rounded-full px-3 py-1.5 text-xs font-semibold transition-opacity hover:opacity-80 ${urgencyColor(a.days_until_stockout)}`}>
-                      <span>{a.item_name}</span>
-                      <span className="opacity-60">·</span>
-                      <span className="opacity-70 font-normal">{storeName.replace("Blinkit ", "")}</span>
-                      <span className="opacity-60">·</span>
-                      <span className="font-bold">{a.days_until_stockout <= 0 ? "OUT" : `${a.days_until_stockout}d`}</span>
+                    <a key={a._id} href="/inventory" className={`tag ${urgencyTag(a.days_until_stockout)} hover:opacity-80`}>
+                      <span className="font-sans font-semibold">{a.item_name}</span>
+                      <span className="opacity-50">·</span>
+                      <span className="opacity-80 font-normal">{storeName}</span>
+                      <span className="opacity-50">·</span>
+                      <span>{a.days_until_stockout <= 0 ? "OUT" : `${a.days_until_stockout}d`}</span>
                     </a>
                   );
                 })}
               </div>
             )}
-          </div>
+          </section>
         )}
 
-        {/* KPI Grid */}
+        {/* ── KPI row ────────────────────────────────────────── */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KpiCard
-            label="Active Alerts" value={loading ? "…" : stats?.active_alerts ?? "—"}
+          <KpiCard label="Active Alerts" value={loading ? "…" : stats?.active_alerts ?? "—"}
             sub={`${criticalAlerts.length} critical · ${reorderAlerts.length} reorder`}
-            icon={AlertTriangle} accent="bg-amber-500/10 text-amber-400" border="rgba(245,158,11,0.2)" />
-          <KpiCard
-            label="Model R²" value={loading ? "…" : stats ? `${(stats.model_r2 * 100).toFixed(1)}%` : "—"}
-            sub={`MAE ${stats?.model_mae ?? "—"} units avg`}
-            icon={TrendingUp} accent="bg-blue-500/10 text-blue-400" border="rgba(59,130,246,0.2)" />
-          <KpiCard
-            label="Dark Stores" value={loading ? "…" : stats?.total_stores ?? "—"}
-            sub="10 Blinkit locations"
-            icon={StoreIcon} accent="bg-violet-500/10 text-violet-400" border="rgba(139,92,246,0.2)" />
-          <KpiCard
-            label="Stock Units" value={loading ? "…" : stats ? stats.total_stock_units.toLocaleString() : "—"}
-            sub={`${stats?.stockout_count ?? 0} stockouts today`}
-            icon={Package} accent="bg-emerald-500/10 text-emerald-400" border="rgba(16,185,129,0.2)" />
+            icon={AlertTriangle} rail="rail-amber" />
+          <KpiCard label="Model R²" value={loading ? "…" : stats ? `${(stats.model_r2 * 100).toFixed(1)}%` : "—"}
+            sub={`MAE ${stats?.model_mae ?? "—"} units avg`} icon={TrendingUp} rail="rail-brand" />
+          <KpiCard label="Dark Stores" value={loading ? "…" : stats?.total_stores ?? "—"}
+            sub="10 Blinkit locations" icon={StoreIcon} rail="rail-blue" />
+          <KpiCard label="Stock Units" value={loading ? "…" : stats ? stats.total_stock_units.toLocaleString() : "—"}
+            sub={`${stats?.stockout_count ?? 0} stockouts today`} icon={Package} rail="rail-green" />
         </div>
 
-        {/* Main content row */}
+        {/* ── Main row ───────────────────────────────────────── */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Active Alerts */}
+          {/* Active alerts */}
           <div className="xl:col-span-2 card space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <h2 className="font-semibold text-white text-sm">Active Alerts</h2>
-              </div>
-              <span className="text-xs text-slate-600 font-mono border border-bg-muted px-2 py-0.5 rounded-full">
-                {alerts.length} total
-              </span>
+              <h2 className="section-title"><AlertTriangle className="w-3.5 h-3.5" /> Active Alerts</h2>
+              <span className="tag tag-ink">{alerts.length} total</span>
             </div>
             {loading ? (
               <div className="py-8 flex items-center justify-center gap-2">
-                <div className="loader" />
-                <span className="text-slate-600 text-sm">Loading…</span>
+                <div className="loader" /><span className="text-ink-3 text-sm">Loading…</span>
               </div>
             ) : alerts.length === 0 ? (
               <div className="py-10 text-center">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-                  <Activity className="w-5 h-5 text-emerald-400" />
+                <div className="w-10 h-10 rounded bg-panel border border-rule flex items-center justify-center mx-auto mb-3">
+                  <Activity className="w-5 h-5 text-sig-green" />
                 </div>
-                <p className="text-slate-400 text-sm font-medium">All clear</p>
-                <p className="text-slate-600 text-xs mt-1">No active inventory alerts</p>
+                <p className="text-ink-2 text-sm font-medium">All clear</p>
+                <p className="text-ink-3 text-xs mt-1">No active inventory alerts</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                 {alerts.slice(0, 15).map((a) => (
-                  <div key={a._id}
-                    className={`border-l-2 rounded-r-xl px-4 py-3 ${ALERT_BORDER[a.alert_type] ?? "border-l-bg-muted"} ${ALERT_BG[a.alert_type] ?? "bg-bg-panel"}`}>
+                  <div key={a._id} className={`bg-panel rounded pl-3.5 pr-4 py-2.5 ${ALERT_RAIL[a.alert_type] ?? "rail-blue"}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-white">{a.item_name}</span>
-                        <span className="text-xs text-slate-500">@ {storeMap[a.store_id]?.name ?? `Store ${a.store_id}`}</span>
+                        <span className="text-sm font-semibold text-ink">{a.item_name}</span>
+                        <span className="text-xs text-ink-3">@ {storeMap[a.store_id]?.name ?? `Store ${a.store_id}`}</span>
                         <span className={SEGMENT_BADGE[a.sku_segment] ?? ""}>{a.sku_segment}</span>
                       </div>
-                      <span className={`text-xs font-bold tracking-wider ${a.alert_type === "critical" ? "text-red-400" : "text-amber-400"}`}>
+                      <span className={`tag ${a.alert_type === "critical" ? "tag-red" : "tag-amber"}`}>
                         {a.alert_type.toUpperCase()}
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-slate-500">
-                      <span>Stock: <b className="text-slate-300">{a.current_stock}</b></span>
-                      <span>Reorder: <b className="text-slate-300">{a.reorder_point}</b></span>
-                      <span>Stockout: <b className="text-amber-400">{a.days_until_stockout}d</b></span>
-                      <span>Order: <b className="text-emerald-400">{a.recommended_order_qty} units</b></span>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-ink-3 font-mono">
+                      <span>Stock <b className="text-ink font-semibold">{a.current_stock}</b></span>
+                      <span>Reorder <b className="text-ink font-semibold">{a.reorder_point}</b></span>
+                      <span>Stockout <b className="text-sig-amber">{a.days_until_stockout}d</b></span>
+                      <span>Order <b className="text-sig-green">{a.recommended_order_qty}u</b></span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            <a href="/inventory" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors pt-1">
+            <a href="/inventory" className="inline-flex items-center gap-1 text-xs text-brand hover:underline pt-1 font-medium">
               View all in Inventory <ArrowRight className="w-3 h-3" />
             </a>
           </div>
 
-          {/* Right column: Festival + Top Movers */}
+          {/* Right column */}
           <div className="space-y-4">
-            {/* Festival Spikes */}
             <div className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="w-4 h-4 text-violet-400" />
-                <h2 className="font-semibold text-white text-sm">Upcoming Festival Spikes</h2>
-              </div>
+              <h2 className="section-title mb-3"><Calendar className="w-3.5 h-3.5" /> Festival Spikes</h2>
               {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => <div key={i} className="h-14 rounded-xl bg-bg-muted animate-pulse" />)}
-                </div>
+                <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-14 skeleton" />)}</div>
               ) : events.length === 0 ? (
-                <p className="text-xs text-slate-600 py-4">No festivals in the next 90 days</p>
+                <p className="text-xs text-ink-3 py-4">No festivals in the next 90 days</p>
               ) : (
                 <div className="space-y-2">
                   {events.slice(0, 4).map((ev) => (
-                    <div key={ev.name} className="rounded-xl border border-violet-500/10 bg-violet-500/5 px-3 py-2.5">
+                    <div key={ev.name} className="rounded bg-panel border border-rule px-3 py-2.5">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-semibold text-white">{ev.name}</span>
-                        <span className={`text-xs font-mono font-bold ${ev.days_away <= 7 ? "text-red-400" : ev.days_away <= 21 ? "text-amber-400" : "text-slate-400"}`}>
-                          {ev.days_away <= 0 ? "Today" : ev.days_away === 1 ? "Tomorrow" : `${ev.days_away}d`}
+                        <span className="text-sm font-semibold text-ink">{ev.name}</span>
+                        <span className={`font-mono text-xs font-semibold ${ev.days_away <= 7 ? "text-sig-red" : ev.days_away <= 21 ? "text-sig-amber" : "text-ink-3"}`}>
+                          {ev.days_away <= 0 ? "Today" : ev.days_away === 1 ? "1d" : `${ev.days_away}d`}
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {Object.entries(ev.multipliers).map(([cat, mult]) => (
-                          <span key={cat} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/20 ${MULT_COLOR(mult)}`}>
+                          <span key={cat} className={`tag ${MULT_COLOR(mult)}`}>
                             {cat} ↑{Math.round((mult - 1) * 100)}%
                           </span>
                         ))}
@@ -262,27 +221,21 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Top Movers */}
             <div className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-accent-cyan" />
-                <h2 className="font-semibold text-white text-sm">Top Products by Demand</h2>
-              </div>
+              <h2 className="section-title mb-3"><TrendingUp className="w-3.5 h-3.5" /> Top Products by Demand</h2>
               {loading ? (
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => <div key={i} className="h-7 rounded-lg bg-bg-muted animate-pulse" />)}
-                </div>
+                <div className="space-y-2">{[...Array(5)].map((_, i) => <div key={i} className="h-7 skeleton" />)}</div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {topItems.map((item, i) => (
-                    <div key={item._id} className="flex items-center gap-2.5 py-1.5 border-b border-bg-border/40 last:border-0">
-                      <span className="text-[10px] text-slate-600 font-mono w-4 shrink-0">#{i + 1}</span>
+                    <div key={item._id} className="flex items-center gap-2.5 py-1.5" style={{ borderBottom: i < topItems.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                      <span className="text-[10px] text-ink-4 font-mono w-5 shrink-0 tnum">{String(i + 1).padStart(2, "0")}</span>
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs text-slate-300 truncate block">{item.name}</span>
-                        <span className="text-[10px] text-slate-600 capitalize">{item.category}</span>
+                        <span className="text-xs text-ink truncate block font-medium">{item.name}</span>
+                        <span className="text-[10px] text-ink-3 capitalize">{item.category}</span>
                       </div>
-                      <span className="text-xs font-mono text-slate-400 shrink-0">
-                        {item.avg_daily_sales.toFixed(0)}<span className="text-slate-600 text-[10px]">/d</span>
+                      <span className="text-xs font-mono text-ink-2 shrink-0 tnum">
+                        {item.avg_daily_sales.toFixed(0)}<span className="text-ink-4 text-[10px]">/d</span>
                       </span>
                     </div>
                   ))}
@@ -292,52 +245,48 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Store Performance */}
+        {/* ── Store performance ──────────────────────────────── */}
         <div className="card">
-          <div className="flex items-center gap-2 mb-4">
-            <StoreIcon className="w-4 h-4 text-violet-400" />
-            <h2 className="font-semibold text-white text-sm">Store Performance</h2>
-          </div>
+          <h2 className="section-title mb-4"><StoreIcon className="w-3.5 h-3.5" /> Store Performance</h2>
           <div className="grid grid-cols-2 xl:grid-cols-5 gap-2">
-            {[...stores].sort((a, b) => b.avg_daily_sales - a.avg_daily_sales).map((s, i) => (
-              <div key={s._id}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-bg-border/40 bg-bg-panel/50 hover:border-bg-muted transition-colors">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${TIER_DOT[s.performance_tier] ?? "bg-slate-500"}`} />
+            {[...stores].sort((a, b) => b.avg_daily_sales - a.avg_daily_sales).map((s) => (
+              <div key={s._id} className="flex items-center gap-2.5 px-3 py-2.5 rounded border border-rule bg-panel">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${TIER_DOT[s.performance_tier] ?? "bg-ink-4"}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-white font-medium truncate">{s.name.replace("Blinkit ", "")}</p>
-                  <p className="text-[10px] text-slate-600">{s.city}</p>
+                  <p className="text-xs text-ink font-medium truncate">{s.name.replace("Blinkit ", "")}</p>
+                  <p className="text-[10px] text-ink-3">{s.city}</p>
                 </div>
-                <span className="text-xs font-mono text-slate-500 shrink-0">
-                  {s.avg_daily_sales.toFixed(0)}<span className="text-slate-700 text-[10px]">/d</span>
+                <span className="text-xs font-mono text-ink-2 shrink-0 tnum">
+                  {s.avg_daily_sales.toFixed(0)}<span className="text-ink-4 text-[10px]">/d</span>
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Model metrics strip */}
+        {/* ── Model metrics strip ────────────────────────────── */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: "MAE",  value: loading ? "…" : stats?.model_mae ?? "—",  sub: "avg error (units)", color: "text-blue-400" },
-            { label: "RMSE", value: loading ? "…" : stats?.model_rmse ?? "—", sub: "root mean sq error", color: "text-cyan-400" },
-            { label: "R²",   value: loading ? "…" : stats ? (stats.model_r2 * 100).toFixed(2) + "%" : "—", sub: "variance explained", color: "text-violet-400" },
-            { label: "MAPE", value: loading ? "…" : stats?.model_mape ?? "—", sub: "% avg error",       color: "text-emerald-400" },
+            { label: "MAE",  value: loading ? "…" : stats?.model_mae ?? "—",  sub: "avg error (units)" },
+            { label: "RMSE", value: loading ? "…" : stats?.model_rmse ?? "—", sub: "root mean sq error" },
+            { label: "R²",   value: loading ? "…" : stats ? (stats.model_r2 * 100).toFixed(2) + "%" : "—", sub: "variance explained" },
+            { label: "MAPE", value: loading ? "…" : stats?.model_mape ?? "—", sub: "% avg error" },
           ].map((m) => (
             <div key={m.label} className="card text-center">
-              <p className="section-title">{m.label}</p>
-              <p className={`text-2xl font-bold mt-2 font-mono ${m.color}`}>{m.value}</p>
-              <p className="text-xs text-slate-600 mt-0.5">{m.sub}</p>
+              <p className="eyebrow">{m.label}</p>
+              <p className="figure text-2xl mt-2">{m.value}</p>
+              <p className="text-xs text-ink-3 mt-0.5">{m.sub}</p>
             </div>
           ))}
         </div>
 
-        {/* Model caveat */}
-        <div className="flex items-start gap-3 bg-slate-800/20 border border-bg-border rounded-xl px-4 py-3">
-          <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-slate-600">
-            <span className="text-slate-400 font-medium">Pattern-based forecasts</span> — LightGBM model trained on 2013-2017 retail data.
-            Forecast dates are remapped to current timeline; seasonal and day-of-week patterns are preserved.
-            Upload your own CSV on the <a href="/upload" className="text-slate-400 underline underline-offset-2 hover:text-white">Upload Data</a> page to power forecasts with real current sales history.
+        {/* ── Caveat ─────────────────────────────────────────── */}
+        <div className="flex items-start gap-3 bg-panel border border-rule rounded px-4 py-3">
+          <Info className="w-4 h-4 text-ink-3 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-ink-3 leading-relaxed">
+            <span className="text-ink-2 font-semibold">Pattern-based forecasts</span> — LightGBM trained on 2013–2017 retail data.
+            Forecast dates are remapped to the current timeline; seasonal and day-of-week patterns are preserved.
+            Upload your own CSV on the <a href="/upload" className="text-brand underline underline-offset-2">Upload Data</a> page to power forecasts with real current sales history.
           </p>
         </div>
       </div>

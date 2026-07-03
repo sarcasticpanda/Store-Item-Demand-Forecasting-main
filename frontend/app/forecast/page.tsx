@@ -5,7 +5,7 @@ import {
   ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import { TrendingUp, Package, AlertTriangle, Activity, Zap, Info, Upload } from "lucide-react";
+import { TrendingUp, AlertTriangle, Activity, Zap, Info, Upload } from "lucide-react";
 
 const HORIZON_OPTIONS = [7, 14, 30, 60, 90];
 const SEG_BADGE: Record<string, string> = {
@@ -25,18 +25,14 @@ export default function ForecastPage() {
   const [error, setError]       = useState(false);
   const [showBase, setShowBase] = useState(true);
 
-  // Load stores + items once
   useEffect(() => {
     api.stores().then(setStores).catch(() => {});
     api.items().then(setItems).catch(() => {});
   }, []);
 
-  // Auto-load current_stock from inventory when store/item changes
   useEffect(() => {
-    // First try localStorage for user-entered override
     const saved = localStorage.getItem(STOCK_KEY(storeId, itemId));
     if (saved !== null) { setStock(saved); return; }
-    // Otherwise fetch from inventory
     api.inventory(storeId)
       .then((inv) => {
         const match = inv.find((r) => r.item_id === itemId);
@@ -45,7 +41,6 @@ export default function ForecastPage() {
       .catch(() => {});
   }, [storeId, itemId]);
 
-  // Persist stock to localStorage when user changes it
   const handleStockChange = (val: string) => {
     setStock(val);
     localStorage.setItem(STOCK_KEY(storeId, itemId), val);
@@ -60,11 +55,10 @@ export default function ForecastPage() {
 
   useEffect(() => { load(); }, [storeId, itemId, days]);
 
-  // Build chart data: historical + base + festival-adjusted
   const chartData = (() => {
     if (!data) return [];
     const hist = data.historical.slice(-60).map((h) => ({
-      date: h.date.slice(5), // show MM-DD for compactness
+      date: h.date.slice(5),
       actual: h.actual_sales,
       base: null as number | null,
       adjusted: null as number | null,
@@ -80,7 +74,6 @@ export default function ForecastPage() {
     return [...hist, ...fore];
   })();
 
-  // Festival reference lines within forecast range
   const festivalDates = data?.forecast
     .filter((f) => f.festival)
     .reduce<{ date: string; name: string }[]>((acc, f) => {
@@ -103,64 +96,50 @@ export default function ForecastPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Page header */}
-      <div className="px-8 pt-8 pb-6 border-b border-bg-border"
-        style={{ background: "linear-gradient(180deg, rgba(6,182,212,0.04) 0%, transparent 100%)" }}>
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-accent-cyan border border-accent-cyan/30 bg-accent-cyan/5 px-3 py-1 rounded-full">
-            <TrendingUp className="w-3 h-3" />
-            LightGBM Forecast
-          </span>
+      {/* Masthead */}
+      <header className="px-8 pt-8 pb-6 bg-surface" style={{ borderBottom: "1px solid var(--rule-strong)" }}>
+        <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+          <span className="pill-brand"><TrendingUp className="w-3 h-3" /> LightGBM Forecast</span>
           {data?.dates_remapped && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-amber-400 border border-amber-400/30 bg-amber-400/5 px-3 py-1 rounded-full">
-              <Info className="w-3 h-3" />
-              Dates remapped to current timeline
-            </span>
+            <span className="pill-amber"><Info className="w-3 h-3" /> Dates remapped to current timeline</span>
           )}
           {data?.has_user_data && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-emerald-400 border border-emerald-400/30 bg-emerald-400/5 px-3 py-1 rounded-full">
-              <Upload className="w-3 h-3" />
-              Using your uploaded data
-            </span>
+            <span className="pill-green"><Upload className="w-3 h-3" /> Using your uploaded data</span>
           )}
-          {hasFestival && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-violet-400 border border-violet-400/30 bg-violet-400/5 px-3 py-1 rounded-full">
-              Festival demand boost applied
-            </span>
-          )}
+          {hasFestival && <span className="pill-violet">Festival demand boost applied</span>}
         </div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Demand Forecast</h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <h1 className="display-heading text-3xl">Demand Forecast</h1>
+        <p className="text-ink-3 text-sm mt-1.5 font-mono">
           {selectedStore && selectedItem
             ? `${selectedStore.name} · ${selectedItem.name} · ${days}-day horizon`
             : "Configure a store and item to see demand predictions"}
         </p>
-      </div>
+      </header>
 
       <div className="px-8 py-7 space-y-6">
-        {/* Controls row */}
+        {/* Controls */}
         <div className="card flex flex-wrap gap-5 items-end">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Store</label>
+            <label className="eyebrow">Store</label>
             <select value={storeId} onChange={(e) => setStoreId(+e.target.value)} className="select">
               {stores.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Product</label>
+            <label className="eyebrow">Product</label>
             <select value={itemId} onChange={(e) => setItemId(+e.target.value)} className="select">
               {items.map((i) => <option key={i._id} value={i._id}>{i.name}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Horizon</label>
+            <label className="eyebrow">Horizon</label>
             <div className="flex gap-1">
               {HORIZON_OPTIONS.map((d) => (
                 <button key={d} onClick={() => setDays(d)}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-200 ${
+                  className={`px-3 py-2 rounded text-xs font-semibold font-mono transition-colors ${
                     days === d
-                      ? "bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/40 shadow-[0_0_10px_rgba(6,182,212,0.15)]"
-                      : "border border-bg-muted text-slate-500 hover:text-slate-200 hover:border-slate-600"
+                      ? "bg-brand-soft text-brand border border-brand/40"
+                      : "border border-rule-strong text-ink-3 hover:text-ink hover:border-ink-3"
                   }`}>
                   {d}d
                 </button>
@@ -168,37 +147,33 @@ export default function ForecastPage() {
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              Current Stock <span className="text-slate-600 normal-case">(auto-loaded)</span>
-            </label>
+            <label className="eyebrow">Current Stock <span className="text-ink-4 normal-case">(auto-loaded)</span></label>
             <input type="number" min={0} value={stock} onChange={(e) => handleStockChange(e.target.value)}
               placeholder="Units in store" className="input w-40" />
           </div>
           {selectedItem && (
             <div className="flex flex-col gap-1.5 ml-auto">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">SKU Segment</label>
+              <label className="eyebrow">SKU Segment</label>
               <div className="flex items-center gap-2 h-9">
                 <span className={SEG_BADGE[selectedItem.sku_segment] ?? ""}>{selectedItem.sku_segment}</span>
-                <span className="text-xs text-slate-600 font-mono">CV {selectedItem.cv}</span>
-                {selectedItem.unit_cost && (
-                  <span className="text-xs text-slate-600">₹{selectedItem.unit_cost}</span>
-                )}
+                <span className="text-xs text-ink-3 font-mono">CV {selectedItem.cv}</span>
+                {selectedItem.unit_cost && <span className="text-xs text-ink-3 font-mono">₹{selectedItem.unit_cost}</span>}
               </div>
             </div>
           )}
         </div>
 
-        {/* Reorder alert banner */}
+        {/* Restock banners */}
         {needRestock && (
-          <div className="flex items-center gap-4 bg-red-500/8 border border-red-500/25 rounded-xl px-5 py-4">
-            <div className="w-8 h-8 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
+          <div className="flex items-center gap-4 bg-surface border border-rule rounded rail-red px-5 py-4">
+            <div className="w-8 h-8 rounded bg-panel border border-rule flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-sig-red" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-red-300">Restock Required</p>
-              <p className="text-xs text-red-400/70 mt-0.5">
+              <p className="text-sm font-semibold text-sig-red">Restock Required</p>
+              <p className="text-xs text-ink-2 mt-0.5">
                 At current forecast demand you need to order{" "}
-                <b className="text-red-300">{Math.abs(deficit!).toFixed(0)} units</b> to cover the next {days} days.
+                <b className="text-sig-red">{Math.abs(deficit!).toFixed(0)} units</b> to cover the next {days} days.
                 {daysLeft !== null && ` Current stock covers ~${daysLeft} day${daysLeft !== 1 ? "s" : ""}.`}
                 {hasFestival && " Festival demand boost included."}
               </p>
@@ -206,12 +181,12 @@ export default function ForecastPage() {
           </div>
         )}
         {hasStock && daysLeft !== null && !needRestock && (
-          <div className="flex items-center gap-4 bg-emerald-500/6 border border-emerald-500/20 rounded-xl px-5 py-4">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0">
-              <Activity className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-4 bg-surface border border-rule rounded rail-green px-5 py-4">
+            <div className="w-8 h-8 rounded bg-panel border border-rule flex items-center justify-center shrink-0">
+              <Activity className="w-4 h-4 text-sig-green" />
             </div>
-            <p className="text-sm text-emerald-300">
-              Stock sufficient — <b>{Math.abs(deficit!).toFixed(0)} units surplus</b> over the {days}-day horizon.
+            <p className="text-sm text-ink-2">
+              Stock sufficient — <b className="text-sig-green">{Math.abs(deficit!).toFixed(0)} units surplus</b> over the {days}-day horizon.
               {daysLeft !== null && ` Stock lasts ~${daysLeft} days.`}
             </p>
           </div>
@@ -221,25 +196,23 @@ export default function ForecastPage() {
         {data && (
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             {[
-              { label: "Total Forecast", value: totalForecast.toFixed(0), sub: `units / ${days} days`, color: "text-accent-cyan" },
-              { label: "Avg Daily",      value: avgForecast.toFixed(1),    sub: "units per day",        color: "text-white" },
+              { label: "Total Forecast", value: totalForecast.toFixed(0), sub: `units / ${days} days`, color: "text-brand" },
+              { label: "Avg Daily",      value: avgForecast.toFixed(1),    sub: "units per day",        color: "text-ink" },
               ...(hasStock && daysLeft !== null ? [{
-                label: "Days of Stock",
-                value: String(daysLeft),
-                sub: "until stockout",
-                color: daysLeft < 7 ? "text-red-400" : daysLeft < 14 ? "text-amber-400" : "text-emerald-400",
+                label: "Days of Stock", value: String(daysLeft), sub: "until stockout",
+                color: daysLeft < 7 ? "text-sig-red" : daysLeft < 14 ? "text-sig-amber" : "text-sig-green",
               }] : []),
               ...(hasStock && deficit !== null ? [{
                 label: deficit < 0 ? "Order Needed" : "Stock Surplus",
                 value: Math.abs(deficit).toFixed(0),
                 sub: deficit < 0 ? "units to order" : "units excess",
-                color: deficit < 0 ? "text-red-400" : "text-emerald-400",
+                color: deficit < 0 ? "text-sig-red" : "text-sig-green",
               }] : []),
             ].map((m) => (
-              <div key={m.label} className="card text-center group">
-                <p className="section-title">{m.label}</p>
-                <p className={`text-2xl font-bold mt-2 font-mono ${m.color}`}>{m.value}</p>
-                <p className="text-xs text-slate-600 mt-0.5">{m.sub}</p>
+              <div key={m.label} className="card text-center">
+                <p className="eyebrow">{m.label}</p>
+                <p className={`figure text-2xl mt-2 ${m.color}`}>{m.value}</p>
+                <p className="text-xs text-ink-3 mt-0.5">{m.sub}</p>
               </div>
             ))}
           </div>
@@ -248,88 +221,75 @@ export default function ForecastPage() {
         {/* Chart */}
         <div className="card">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-accent-cyan" />
-              <h2 className="font-semibold text-white text-sm">Historical Sales + Demand Forecast</h2>
-            </div>
+            <h2 className="section-title"><Zap className="w-3.5 h-3.5" /> Historical Sales + Demand Forecast</h2>
             <div className="flex items-center gap-3">
               {hasFestival && (
                 <label className="flex items-center gap-1.5 cursor-pointer">
                   <input type="checkbox" checked={showBase} onChange={(e) => setShowBase(e.target.checked)}
-                    className="w-3 h-3 accent-violet-500" />
-                  <span className="text-[11px] text-slate-500">Show base demand</span>
+                    className="w-3 h-3" style={{ accentColor: "var(--brand)" }} />
+                  <span className="text-[11px] text-ink-3">Show base demand</span>
                 </label>
               )}
               {loading && <div className="loader" />}
             </div>
           </div>
 
-          {/* Festival legend strip */}
           {hasFestival && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {festivalDates.map((f) => (
-                <span key={f.name} className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300">
-                  🎉 {f.name}
-                </span>
-              ))}
+              {festivalDates.map((f) => <span key={f.name} className="tag tag-amber">🎉 {f.name}</span>)}
             </div>
           )}
 
           {error ? (
             <div className="h-72 flex flex-col items-center justify-center gap-3">
-              <AlertTriangle className="w-8 h-8 text-red-400/50" />
-              <p className="text-slate-500 text-sm">Failed to load forecast — check backend connection</p>
+              <AlertTriangle className="w-8 h-8 text-sig-red opacity-50" />
+              <p className="text-ink-3 text-sm">Failed to load forecast — check backend connection</p>
               <button onClick={load} className="btn-ghost text-xs">Retry</button>
             </div>
           ) : !data && !loading ? (
-            <div className="h-72 flex items-center justify-center text-slate-600 text-sm">Select a store and product above</div>
+            <div className="h-72 flex items-center justify-center text-ink-3 text-sm">Select a store and product above</div>
           ) : (
             <ResponsiveContainer width="100%" height={340}>
               <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                 <defs>
                   <linearGradient id="foreGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#06b6d4" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.02} />
+                    <stop offset="5%"  stopColor="#1C3D5A" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#1C3D5A" stopOpacity={0.02} />
                   </linearGradient>
                   <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#64748b" stopOpacity={0.12} />
-                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.02} />
+                    <stop offset="5%"  stopColor="#8A8071" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#8A8071" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(30,33,48,0.8)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: "#475569", fontSize: 10 }} tickLine={false} axisLine={false}
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(205,195,172,0.6)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "#CDC3AC" }}
                   interval={Math.max(1, Math.floor(chartData.length / 8))} />
-                <YAxis tick={{ fill: "#475569", fontSize: 10 }} tickLine={false} axisLine={false} width={35} />
+                <YAxis tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={false} width={35} />
                 <Tooltip
-                  contentStyle={{ background: "rgba(15,17,23,0.95)", border: "1px solid rgba(30,33,48,0.9)", borderRadius: 10, fontSize: 12, padding: "8px 12px" }}
-                  labelStyle={{ color: "#94a3b8", marginBottom: 4 }}
-                  itemStyle={{ color: "#e2e8f0" }}
-                  cursor={{ stroke: "rgba(255,255,255,0.07)" }} />
-                <Legend wrapperStyle={{ fontSize: 11, color: "#64748b", paddingTop: 8 }} />
-                {/* Forecast start marker */}
+                  contentStyle={{ background: "#FFFDF9", border: "1px solid #CDC3AC", borderRadius: 6, fontSize: 12, padding: "8px 12px", color: "#1B1712" }}
+                  labelStyle={{ color: "#4C463B", marginBottom: 4 }}
+                  itemStyle={{ color: "#1B1712" }}
+                  cursor={{ stroke: "rgba(28,61,90,0.15)" }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: "#8A8071", paddingTop: 8 }} />
                 {splitDate && (
-                  <ReferenceLine x={splitDate} stroke="rgba(139,92,246,0.5)" strokeDasharray="4 4"
-                    label={{ value: "Forecast Start", fill: "#7c3aed", fontSize: 10, dy: -6 }} />
+                  <ReferenceLine x={splitDate} stroke="rgba(28,61,90,0.5)" strokeDasharray="4 4"
+                    label={{ value: "Forecast Start", fill: "#1C3D5A", fontSize: 10, dy: -6 }} />
                 )}
-                {/* Festival markers */}
                 {festivalDates.map((f) => (
-                  <ReferenceLine key={f.name} x={f.date} stroke="rgba(245,158,11,0.4)" strokeDasharray="3 3"
-                    label={{ value: f.name, fill: "#d97706", fontSize: 9, dy: 12 }} />
+                  <ReferenceLine key={f.name} x={f.date} stroke="rgba(154,107,21,0.5)" strokeDasharray="3 3"
+                    label={{ value: f.name, fill: "#9A6B15", fontSize: 9, dy: 12 }} />
                 ))}
-                <Area dataKey="actual"   name="Actual Sales"     stroke="#475569" fill="url(#actGrad)" dot={false} strokeWidth={1.5} connectNulls={false} />
-                {/* Base demand — dashed, only shown if festival active and toggle on */}
+                <Area dataKey="actual" name="Actual Sales" stroke="#8A8071" fill="url(#actGrad)" dot={false} strokeWidth={1.5} connectNulls={false} />
                 {hasFestival && showBase && (
-                  <Line dataKey="base" name="Base Demand" stroke="#64748b" dot={false} strokeWidth={1.5}
-                    strokeDasharray="5 3" connectNulls={false} />
+                  <Line dataKey="base" name="Base Demand" stroke="#B4AA97" dot={false} strokeWidth={1.5} strokeDasharray="5 3" connectNulls={false} />
                 )}
-                <Area dataKey="adjusted" name="Festival-Adjusted Forecast" stroke="#06b6d4" fill="url(#foreGrad)" dot={false} strokeWidth={2} connectNulls={false} />
+                <Area dataKey="adjusted" name="Festival-Adjusted Forecast" stroke="#1C3D5A" fill="url(#foreGrad)" dot={false} strokeWidth={2} connectNulls={false} />
               </ComposedChart>
             </ResponsiveContainer>
           )}
 
-          {/* Model caveat */}
-          <p className="text-[10px] text-slate-700 mt-3 text-right">
-            Pattern model trained on 2013-2017 retail data.
+          <p className="text-[10px] text-ink-4 mt-3 text-right font-mono">
+            Pattern model trained on 2013–2017 retail data.
             {data?.dates_remapped && " Dates remapped to current timeline — seasonal patterns preserved."}
             {data?.has_user_data && " Forecast incorporates your uploaded sales history."}
           </p>
