@@ -99,7 +99,7 @@ export default function AgentsPage() {
       <div className="px-8 pt-8 pb-6 border-b border-bg-border"
         style={{ background: "linear-gradient(180deg,rgba(139,92,246,.05) 0%,transparent 100%)" }}>
         <div className="flex items-center gap-2 mb-2">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-violet-400 border border-violet-400/30 bg-violet-400/5 px-3 py-1 rounded-full">
+          <span className="pill-violet">
             <Zap className="w-3 h-3" />
             AI Control Tower
           </span>

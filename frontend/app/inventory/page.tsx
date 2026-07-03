@@ -98,7 +98,7 @@ export default function InventoryPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-accent-green border border-accent-green/30 bg-accent-green/5 px-3 py-1 rounded-full">
+              <span className="pill-green">
                 <Package className="w-3 h-3" />
                 Inventory Control
               </span>

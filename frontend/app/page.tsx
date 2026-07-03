@@ -78,21 +78,20 @@ export default function DashboardPage() {
   return (
     <div className="relative min-h-screen">
       {/* Hero banner */}
-      <div className="relative overflow-hidden border-b border-bg-border"
-        style={{ background: "linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%)" }}>
+      <div className="relative overflow-hidden border-b border-bg-border hero-gradient">
         <StaticSpotlight className="-top-40 left-0 md:left-60 md:-top-20" />
         <div className="relative z-10 px-8 pt-10 pb-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-accent-blue border border-accent-blue/30 bg-accent-blue/5 px-3 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-blue animate-pulse" />
+                <span className="pill-amber">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                   Live Intelligence
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+              <h1 className="display-heading text-3xl text-white">
                 Demand Intelligence
-                <span className="block text-lg font-normal text-slate-400 mt-1">
+                <span className="block text-base font-normal text-slate-500 mt-1.5" style={{ fontFamily: "Inter, sans-serif", letterSpacing: "normal" }}>
                   Blinkit dark store inventory · 10 locations · 50 SKUs
                 </span>
               </h1>
