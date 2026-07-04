@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Anton&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -295,4 +295,89 @@
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDING PAGE — deep teal ground, orange accent, condensed display
+   Scoped under .landing so it never leaks into the app theme.
+   ═══════════════════════════════════════════════════════════════ */
+.landing {
+  --lnd-ink:      #0A2124;   /* deep teal-black ground */
+  --lnd-ink-2:    #0E2A2E;   /* raised teal panel */
+  --lnd-teal:     #13494C;   /* mid teal */
+  --lnd-cream:    #F4F1EA;   /* warm off-white */
+  --lnd-cream-2:  #FBFAF6;
+  --lnd-orange:   #F26522;   /* primary accent */
+  --lnd-orange-2: #E05A1A;
+  --lnd-amber:    #F5A524;
+  --lnd-fog:      rgba(244,241,234,0.65);
+  --lnd-line:     rgba(244,241,234,0.14);
+  background: var(--lnd-ink);
+  color: var(--lnd-cream);
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+
+/* Condensed display face (Anton) for hero + big section titles */
+.display-x {
+  font-family: 'Anton', 'Archivo', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+/* Eyebrow on dark */
+.lnd-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lnd-fog);
+}
+
+/* Text-roll hover — duplicate label, roll up on hover */
+.roll { display: inline-flex; flex-direction: column; overflow: hidden; height: 1.25em; line-height: 1.25em; }
+.roll > span { transition: transform 0.5s cubic-bezier(0.25,0.1,0.25,1); }
+.group:hover .roll > span { transform: translateY(-100%); }
+
+/* Arrow rotate on hover */
+.arrow-rot { transition: transform 0.5s cubic-bezier(0.25,0.1,0.25,1); }
+.group:hover .arrow-rot { transform: rotate(-45deg); }
+
+/* Drifting hero glows */
+@keyframes drift-a {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(6%, -4%) scale(1.12); }
+}
+@keyframes drift-b {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(-5%, 5%) scale(1.08); }
+}
+.glow-a { animation: drift-a 16s ease-in-out infinite; }
+.glow-b { animation: drift-b 20s ease-in-out infinite; }
+
+/* Network route pulse + dash */
+@keyframes dash-flow { to { stroke-dashoffset: -60; } }
+@keyframes node-pulse {
+  0%,100% { opacity: 0.35; r: 3; }
+  50%     { opacity: 1; r: 4.5; }
+}
+.route-line { stroke-dasharray: 5 7; animation: dash-flow 3.5s linear infinite; }
+.route-node { animation: node-pulse 2.8s ease-in-out infinite; }
+
+/* Scroll-in entrance */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: riseIn 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* Marquee for stat band */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 26s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-a, .glow-b, .route-line, .route-node, .rise, .marquee-track { animation: none !important; }
+  .roll > span, .arrow-rot { transition: none !important; }
 }

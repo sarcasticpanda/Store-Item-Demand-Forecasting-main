@@ -5,7 +5,7 @@ import { LayoutDashboard, TrendingUp, Package, BarChart3, RefreshCw, Upload, Bra
 import { motion } from "framer-motion";
 
 const nav = [
-  { href: "/",          label: "Dashboard",   icon: LayoutDashboard, code: "00" },
+  { href: "/dashboard", label: "Dashboard",   icon: LayoutDashboard, code: "00" },
   { href: "/forecast",  label: "Forecast",    icon: TrendingUp,      code: "01" },
   { href: "/inventory", label: "Inventory",   icon: Package,         code: "02" },
   { href: "/upload",    label: "Upload Data", icon: Upload,          code: "03" },
@@ -24,10 +24,10 @@ export default function Sidebar() {
         borderRight: "1px solid var(--rule-strong)",
       }}>
 
-      {/* Logo / masthead */}
+      {/* Logo / masthead — links back to landing site */}
       <div className="px-5 pt-6 pb-5" style={{ borderBottom: "1px solid var(--rule)" }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-[5px] flex items-center justify-center shrink-0"
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-9 h-9 rounded-[5px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-95"
             style={{ background: "var(--ink)" }}>
             <span className="text-[15px] font-extrabold tracking-tight" style={{ color: "var(--surface)" }}>iQ</span>
           </div>
@@ -39,7 +39,7 @@ export default function Sidebar() {
               Demand Ops
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav */}
