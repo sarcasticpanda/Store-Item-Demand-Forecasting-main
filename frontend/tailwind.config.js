@@ -8,35 +8,35 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // ── Warm paper surfaces (Light Ops Terminal) ─────────────
-        ground:  "#F4F0E7",   // page background — warm paper
-        surface: "#FFFDF9",   // cards / panels — bright paper
-        panel:   "#EFE9DB",   // recessed areas / table headers
-        sunk:    "#E7E0CF",   // deepest inset
-        // ── Ink type scale (warm near-black) ─────────────────────
+        // ── Deep teal ground (matches landing) ───────────────────
+        ground:  "#0A2124",   // page background — deep teal-black
+        surface: "#0E2A2E",   // cards / panels
+        panel:   "#14383B",   // recessed / chips / table headers
+        sunk:    "#071A1C",   // deepest inset (progress tracks)
+        // ── Cream ink type scale ─────────────────────────────────
         ink: {
-          DEFAULT: "#1B1712",  // primary text
-          2:       "#4C463B",  // secondary text
-          3:       "#8A8071",  // muted labels
-          4:       "#B4AA97",  // faint / disabled
+          DEFAULT: "#F4F1EA",  // primary text (warm cream)
+          2:       "#B8C4BF",  // secondary
+          3:       "#7E908B",  // muted labels
+          4:       "#566863",  // faint
         },
         // ── Rules / hairlines ────────────────────────────────────
         rule: {
-          DEFAULT: "#E1D9C7",  // hairline
-          strong:  "#CDC3AC",  // emphasized divider
+          DEFAULT: "#1E3B3E",
+          strong:  "#2C4F52",
         },
-        // ── Brand: deep ink-blue (interactive / active) ──────────
+        // ── Brand: orange (interactive / active) ─────────────────
         brand: {
-          DEFAULT: "#1C3D5A",
-          ink:     "#12293D",
-          soft:    "#E5EAF0",
+          DEFAULT: "#F26522",
+          ink:     "#E05A1A",
+          soft:    "rgba(242,101,34,0.15)",
         },
-        // ── Signal colors — stock state only (stamp-ink tones) ───
+        // ── Signal colors — stock state (bright for dark) ────────
         sig: {
-          red:   "#B23B2E",   // critical / stockout
-          amber: "#9A6B15",   // reorder
-          green: "#2E6E43",   // ok / healthy
-          blue:  "#2C5F86",   // overstock / info
+          red:   "#F87171",   // critical / stockout
+          amber: "#F5A524",   // reorder
+          green: "#34D399",   // ok / healthy
+          blue:  "#60A5FA",   // overstock / info
         },
       },
       fontFamily: {
@@ -45,17 +45,14 @@ module.exports = {
         mono:    ["'IBM Plex Mono'", "ui-monospace", "monospace"],
       },
       borderRadius: {
-        // squared-off, manifest feel — small radii only
         DEFAULT: "4px",
         md: "5px",
         lg: "6px",
         xl: "8px",
       },
       boxShadow: {
-        // soft ink shadows, no glow
-        card:       "0 1px 2px rgba(27,23,18,0.05), 0 1px 1px rgba(27,23,18,0.03)",
-        "card-lift":"0 4px 14px rgba(27,23,18,0.08), 0 1px 3px rgba(27,23,18,0.04)",
-        inset:      "inset 0 1px 0 rgba(255,255,255,0.6)",
+        card:       "0 1px 2px rgba(0,0,0,0.28)",
+        "card-lift":"0 8px 30px rgba(0,0,0,0.35)",
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4,0,0.6,1) infinite",

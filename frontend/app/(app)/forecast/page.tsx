@@ -253,37 +253,37 @@ export default function ForecastPage() {
               <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
                 <defs>
                   <linearGradient id="foreGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#1C3D5A" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#1C3D5A" stopOpacity={0.02} />
+                    <stop offset="5%"  stopColor="#F26522" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="#F26522" stopOpacity={0.02} />
                   </linearGradient>
                   <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#8A8071" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#8A8071" stopOpacity={0.02} />
+                    <stop offset="5%"  stopColor="#7E908B" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#7E908B" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(205,195,172,0.6)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "#CDC3AC" }}
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(244,241,234,0.09)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: "#7E908B", fontSize: 10 }} tickLine={false} axisLine={{ stroke: "#2C4F52" }}
                   interval={Math.max(1, Math.floor(chartData.length / 8))} />
-                <YAxis tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={false} width={35} />
+                <YAxis tick={{ fill: "#7E908B", fontSize: 10 }} tickLine={false} axisLine={false} width={35} />
                 <Tooltip
-                  contentStyle={{ background: "#FFFDF9", border: "1px solid #CDC3AC", borderRadius: 6, fontSize: 12, padding: "8px 12px", color: "#1B1712" }}
-                  labelStyle={{ color: "#4C463B", marginBottom: 4 }}
-                  itemStyle={{ color: "#1B1712" }}
-                  cursor={{ stroke: "rgba(28,61,90,0.15)" }} />
-                <Legend wrapperStyle={{ fontSize: 11, color: "#8A8071", paddingTop: 8 }} />
+                  contentStyle={{ background: "#0E2A2E", border: "1px solid #2C4F52", borderRadius: 6, fontSize: 12, padding: "8px 12px", color: "#F4F1EA" }}
+                  labelStyle={{ color: "#B8C4BF", marginBottom: 4 }}
+                  itemStyle={{ color: "#F4F1EA" }}
+                  cursor={{ stroke: "rgba(242,101,34,0.25)" }} />
+                <Legend wrapperStyle={{ fontSize: 11, color: "#7E908B", paddingTop: 8 }} />
                 {splitDate && (
-                  <ReferenceLine x={splitDate} stroke="rgba(28,61,90,0.5)" strokeDasharray="4 4"
-                    label={{ value: "Forecast Start", fill: "#1C3D5A", fontSize: 10, dy: -6 }} />
+                  <ReferenceLine x={splitDate} stroke="rgba(242,101,34,0.55)" strokeDasharray="4 4"
+                    label={{ value: "Forecast Start", fill: "#F26522", fontSize: 10, dy: -6 }} />
                 )}
                 {festivalDates.map((f) => (
-                  <ReferenceLine key={f.name} x={f.date} stroke="rgba(154,107,21,0.5)" strokeDasharray="3 3"
-                    label={{ value: f.name, fill: "#9A6B15", fontSize: 9, dy: 12 }} />
+                  <ReferenceLine key={f.name} x={f.date} stroke="rgba(245,165,36,0.5)" strokeDasharray="3 3"
+                    label={{ value: f.name, fill: "#F5A524", fontSize: 9, dy: 12 }} />
                 ))}
-                <Area dataKey="actual" name="Actual Sales" stroke="#8A8071" fill="url(#actGrad)" dot={false} strokeWidth={1.5} connectNulls={false} />
+                <Area dataKey="actual" name="Actual Sales" stroke="#7E908B" fill="url(#actGrad)" dot={false} strokeWidth={1.5} connectNulls={false} />
                 {hasFestival && showBase && (
-                  <Line dataKey="base" name="Base Demand" stroke="#B4AA97" dot={false} strokeWidth={1.5} strokeDasharray="5 3" connectNulls={false} />
+                  <Line dataKey="base" name="Base Demand" stroke="#566863" dot={false} strokeWidth={1.5} strokeDasharray="5 3" connectNulls={false} />
                 )}
-                <Area dataKey="adjusted" name="Festival-Adjusted Forecast" stroke="#1C3D5A" fill="url(#foreGrad)" dot={false} strokeWidth={2} connectNulls={false} />
+                <Area dataKey="adjusted" name="Festival-Adjusted Forecast" stroke="#F26522" fill="url(#foreGrad)" dot={false} strokeWidth={2} connectNulls={false} />
               </ComposedChart>
             </ResponsiveContainer>
           )}

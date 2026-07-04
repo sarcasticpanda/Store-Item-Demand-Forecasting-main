@@ -7,17 +7,14 @@ import {
 } from "recharts";
 import { BarChart3, TrendingUp, Layers, Zap } from "lucide-react";
 
-const SKU_COLORS: Record<string, string> = {
-  fast: "#2E6E43", slow: "#8A8071", premium: "#5b4c7a", essential: "#9A6B15",
-};
 const SKU_TAG: Record<string, string> = {
   fast: "tag-green", slow: "tag-ink", premium: "pill-violet", essential: "tag-amber",
 };
 const TOOLTIP_STYLE = {
-  contentStyle: { background: "#FFFDF9", border: "1px solid #CDC3AC", borderRadius: 6, fontSize: 12, padding: "8px 12px", color: "#1B1712" },
-  labelStyle: { color: "#4C463B", marginBottom: 4 },
-  itemStyle: { color: "#1B1712" },
-  cursor: { fill: "rgba(28,61,90,0.05)" },
+  contentStyle: { background: "#0E2A2E", border: "1px solid #2C4F52", borderRadius: 6, fontSize: 12, padding: "8px 12px", color: "#F4F1EA" },
+  labelStyle: { color: "#B8C4BF", marginBottom: 4 },
+  itemStyle: { color: "#F4F1EA" },
+  cursor: { fill: "rgba(242,101,34,0.06)" },
 };
 
 export default function AnalyticsPage() {
@@ -94,13 +91,13 @@ export default function AnalyticsPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={storeData} layout="vertical" margin={{ left: 10, right: 20, top: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(205,195,172,0.6)" horizontal={false} />
-                      <XAxis type="number" tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: "#4C463B", fontSize: 11 }} tickLine={false} axisLine={false} width={28} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(244,241,234,0.09)" horizontal={false} />
+                      <XAxis type="number" tick={{ fill: "#7E908B", fontSize: 10 }} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: "#B8C4BF", fontSize: 11 }} tickLine={false} axisLine={false} width={28} />
                       <Tooltip {...TOOLTIP_STYLE} />
                       <Bar dataKey="mae" name="MAE ×100" radius={[0, 3, 3, 0]}>
                         {storeData.map((_: any, i: number) => (
-                          <Cell key={i} fill={i < 3 ? "#B23B2E" : i < 6 ? "#9A6B15" : "#2E6E43"} />
+                          <Cell key={i} fill={i < 3 ? "#F87171" : i < 6 ? "#F5A524" : "#34D399"} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -115,11 +112,11 @@ export default function AnalyticsPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={featData} layout="vertical" margin={{ left: 10, right: 20, top: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(205,195,172,0.6)" horizontal={false} />
-                      <XAxis type="number" tick={{ fill: "#8A8071", fontSize: 10 }} tickLine={false} axisLine={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fill: "#4C463B", fontSize: 10 }} tickLine={false} axisLine={false} width={90} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(244,241,234,0.09)" horizontal={false} />
+                      <XAxis type="number" tick={{ fill: "#7E908B", fontSize: 10 }} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fill: "#B8C4BF", fontSize: 10 }} tickLine={false} axisLine={false} width={90} />
                       <Tooltip {...TOOLTIP_STYLE} />
-                      <Bar dataKey="importance" fill="#1C3D5A" name="Importance" radius={[0, 3, 3, 0]} />
+                      <Bar dataKey="importance" fill="#F26522" name="Importance" radius={[0, 3, 3, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -154,7 +151,7 @@ export default function AnalyticsPage() {
                     const intensity = Math.min(r.mae / 0.22, 1);
                     return (
                       <div key={r.item_id} className="rounded px-3 py-2.5 text-center min-w-[76px] border border-rule"
-                        style={{ background: `rgba(178,59,46,${0.06 + intensity * 0.28})` }}>
+                        style={{ background: `rgba(248,113,113,${0.08 + intensity * 0.34})` }}>
                         <p className="text-[10px] text-ink-3 font-mono">Item {r.item_id}</p>
                         <p className="figure text-sm mt-0.5">{(r.mae * 100).toFixed(1)}</p>
                       </div>
