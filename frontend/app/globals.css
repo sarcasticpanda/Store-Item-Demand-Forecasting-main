@@ -269,12 +269,12 @@
     background: var(--rule);
   }
 
-  /* ── DISPLAY HEADING ────────────────────────────────────────── */
+  /* ── DISPLAY HEADING (orange, echoes the hero accent) ───────── */
   .display-heading {
     font-family: 'Archivo', system-ui, sans-serif;
     font-weight: 800;
     letter-spacing: -0.025em;
-    color: var(--ink);
+    color: var(--brand);
   }
 }
 

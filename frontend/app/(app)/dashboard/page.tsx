@@ -10,12 +10,12 @@ const ALERT_RAIL: Record<string, string> = { critical: "rail-red", reorder: "rai
 const TIER_DOT: Record<string, string> = { high: "bg-sig-green", medium: "bg-sig-amber", low: "bg-sig-red" };
 const MULT_COLOR = (m: number) => m >= 1.5 ? "tag-red" : m >= 1.3 ? "tag-amber" : "tag-green";
 
-function KpiCard({ label, value, sub, icon: Icon, rail }: {
+function KpiCard({ label, value, sub, icon: Icon, rail, delay = 0 }: {
   label: string; value: string | number; sub?: string;
-  icon: React.ElementType; rail: string;
+  icon: React.ElementType; rail: string; delay?: number;
 }) {
   return (
-    <div className={`card-flat ${rail} flex items-start gap-3.5`}>
+    <div className={`card-flat ${rail} flex items-start gap-3.5 rise`} style={{ animationDelay: `${delay}s` }}>
       <div className="w-9 h-9 rounded flex items-center justify-center shrink-0 bg-panel border border-rule">
         <Icon className="w-4 h-4 text-ink-2" strokeWidth={2} />
       </div>
@@ -66,7 +66,7 @@ export default function DashboardPage() {
       {/* ── Masthead ─────────────────────────────────────────── */}
       <header className="px-8 pt-8 pb-6 bg-surface" style={{ borderBottom: "1px solid var(--rule-strong)" }}>
         <div className="flex items-start justify-between flex-wrap gap-5">
-          <div>
+          <div className="rise">
             <div className="flex items-center gap-2 mb-2.5">
               <span className="pill-green">
                 <span className="w-1.5 h-1.5 rounded-full bg-sig-green animate-pulse-slow" />
@@ -132,13 +132,13 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <KpiCard label="Active Alerts" value={loading ? "…" : stats?.active_alerts ?? "—"}
             sub={`${criticalAlerts.length} critical · ${reorderAlerts.length} reorder`}
-            icon={AlertTriangle} rail="rail-amber" />
+            icon={AlertTriangle} rail="rail-amber" delay={0} />
           <KpiCard label="Model R²" value={loading ? "…" : stats ? `${(stats.model_r2 * 100).toFixed(1)}%` : "—"}
-            sub={`MAE ${stats?.model_mae ?? "—"} units avg`} icon={TrendingUp} rail="rail-brand" />
+            sub={`MAE ${stats?.model_mae ?? "—"} units avg`} icon={TrendingUp} rail="rail-brand" delay={0.06} />
           <KpiCard label="Dark Stores" value={loading ? "…" : stats?.total_stores ?? "—"}
-            sub="10 Blinkit locations" icon={StoreIcon} rail="rail-blue" />
+            sub="10 Blinkit locations" icon={StoreIcon} rail="rail-blue" delay={0.12} />
           <KpiCard label="Stock Units" value={loading ? "…" : stats ? stats.total_stock_units.toLocaleString() : "—"}
-            sub={`${stats?.stockout_count ?? 0} stockouts today`} icon={Package} rail="rail-green" />
+            sub={`${stats?.stockout_count ?? 0} stockouts today`} icon={Package} rail="rail-green" delay={0.18} />
         </div>
 
         {/* ── Main row ───────────────────────────────────────── */}
